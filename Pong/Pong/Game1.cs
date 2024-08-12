@@ -1,20 +1,36 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Diagnostics;
 
 namespace Pong
 {
     public class Game1 : Game
     {
-        Texture2D ballTexture;
-        Vector2 ballPosition;
-        float ballSpeed;
+        private enum GameState
+        {
+            WaitingToStart,
+            Playing,
+            Scored
+        }
+        private GameState currentState = GameState.WaitingToStart;
+        private int scorePlayer1 = 0;
+        private int scorePlayer2 = 0;
 
-
-        int joystickDeadZone;
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        SpriteFont gameFont;
+
+        private Ball ball;
+        private const float MaxBounceAngle = 2f * MathHelper.Pi / 12f; // 75 degrees
+        private const float BallSpeed = 200f; 
+
+        private Paddle paddle1;
+        private Paddle paddle2;
+
+        int joystickDeadZone;
 
         public Game1()
         {
@@ -25,11 +41,12 @@ namespace Pong
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2,
-            _graphics.PreferredBackBufferHeight / 2);
-            ballSpeed = 400f;
-            joystickDeadZone = 4096;
+            // Initialize ball
+            ball = new Ball(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2, BallSpeed);
+
+            // Initialize paddles for two players
+            paddle1 = new Paddle(30, _graphics.PreferredBackBufferHeight / 2, 300f);  // Left paddle
+            paddle2 = new Paddle(_graphics.PreferredBackBufferWidth - 30, _graphics.PreferredBackBufferHeight / 2, 300f);  // Right paddle
 
             base.Initialize();
         }
@@ -37,109 +54,158 @@ namespace Pong
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            gameFont = Content.Load<SpriteFont>("GameFont");
 
             // TODO: use this.Content to load your game content here
-            ballTexture = Content.Load<Texture2D>("ball");
+            Texture2D ballTexture = Content.Load<Texture2D>("ball");
+            ball.LoadContent(ballTexture);
+
+            // Load content for paddles, assuming a texture named "paddle"
+            paddle1.LoadContent(Content, "paddle");
+            paddle2.LoadContent(Content, "paddle");
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            // TODO: Add your update logic here
-            var kstate = Keyboard.GetState();
-
-            #region Keyboard controls
-            if (kstate.IsKeyDown(Keys.Up))
+            // Handle input to start the game
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && currentState == GameState.WaitingToStart)
             {
-                ballPosition.Y -= ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                currentState = GameState.Playing;
+                // Initialize or reset the ball's direction and speed when starting
+                ball.StartMoving(_graphics.GraphicsDevice.Viewport.Width, _graphics.GraphicsDevice.Viewport.Height);
+            }
+            if (currentState == GameState.Playing)
+            {
+                ball.Update(gameTime, _graphics.GraphicsDevice);
+                CheckPaddleCollisions(gameTime);
+
+                // Additional logic to handle the ball going off the screen sides
+                HandleBallOffScreen();
             }
 
-            if (kstate.IsKeyDown(Keys.Down))
-            {
-                ballPosition.Y += ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
-
-            if (kstate.IsKeyDown(Keys.Left))
-            {
-                ballPosition.X -= ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
-
-            if (kstate.IsKeyDown(Keys.Right))
-            {
-                ballPosition.X += ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
-            #endregion
-
-            #region joystick controls
-            if (Joystick.LastConnectedIndex == 0)
-            {
-                JoystickState jstate = Joystick.GetState((int)PlayerIndex.One);
-
-                float updatedBallSpeed = ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                if (jstate.Axes[1] < -joystickDeadZone)
-                {
-                    ballPosition.Y -= updatedBallSpeed;
-                }
-                else if (jstate.Axes[1] > joystickDeadZone)
-                {
-                    ballPosition.Y += updatedBallSpeed;
-                }
-
-                if (jstate.Axes[0] < -joystickDeadZone)
-                {
-                    ballPosition.X -= updatedBallSpeed;
-                }
-                else if (jstate.Axes[0] > joystickDeadZone)
-                {
-                    ballPosition.X += updatedBallSpeed;
-                }
-            }
-            #endregion
-
-            #region bound to screen
-            if (ballPosition.X > _graphics.PreferredBackBufferWidth - ballTexture.Width / 2)
-            {
-                ballPosition.X = _graphics.PreferredBackBufferWidth - ballTexture.Width / 2;
-            }
-            else if (ballPosition.X < ballTexture.Width / 2)
-            {
-                ballPosition.X = ballTexture.Width / 2;
-            }
-
-            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - ballTexture.Height / 2)
-            {
-                ballPosition.Y = _graphics.PreferredBackBufferHeight - ballTexture.Height / 2;
-            }
-            else if (ballPosition.Y < ballTexture.Height / 2)
-            {
-                ballPosition.Y = ballTexture.Height / 2;
-            }
-            #endregion
+            // Update ball and paddles
+            paddle1.Update(gameTime, _graphics.GraphicsDevice, Keys.W, Keys.S);  // Controls for paddle 1
+            paddle2.Update(gameTime, _graphics.GraphicsDevice, Keys.Up, Keys.Down);  // Controls for paddle 2
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            Vector2 messageSize;
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
             _spriteBatch.Begin();
-            _spriteBatch.Draw(ballTexture, 
-                ballPosition, 
-                null, 
-                Color.White, 
-                0f, 
-                new Vector2(ballTexture.Width / 2, ballTexture.Height / 2), 
-                Vector2.One, 
-                SpriteEffects.None, 
-                0f);
+            ball.Draw(_spriteBatch);
+            paddle1.Draw(_spriteBatch);
+            paddle2.Draw(_spriteBatch);
+
+
+            // Display scores
+            string scoreText = $"P1:{scorePlayer1}";
+            _spriteBatch.DrawString(gameFont, scoreText, new Vector2(10, 10), Color.Black);
+
+
+            string scoreValues = $"P2:{scorePlayer2}";
+            messageSize = gameFont.MeasureString(scoreValues);
+            _spriteBatch.DrawString(gameFont, scoreValues, new Vector2(_graphics.PreferredBackBufferWidth - messageSize.X - 10, 10), Color.Black);
+
+            // Conditionally display the start message
+            if (currentState == GameState.WaitingToStart)
+            {
+                string startMessage = "Press Space to Start";
+                messageSize = gameFont.MeasureString(startMessage);
+                _spriteBatch.DrawString(gameFont, startMessage, new Vector2((_graphics.PreferredBackBufferWidth - messageSize.X) / 2, _graphics.PreferredBackBufferHeight / 2), Color.Black);
+            }
+
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void CheckPaddleCollisions(GameTime gameTime)
+        {
+            Vector2 futurePosition = ball.Position + ball.Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Rectangle futureBoundingBox = new Rectangle(
+                (int)futurePosition.X - ball.Texture.Width / 2,
+                (int)futurePosition.Y - ball.Texture.Height / 2,
+                ball.Texture.Width,
+                ball.Texture.Height);
+
+            if (futureBoundingBox.Intersects(paddle1.BoundingBox))
+            {
+                HandlePaddleCollision(paddle1, ball, gameTime);
+            }
+            if (futureBoundingBox.Intersects(paddle2.BoundingBox))
+            {
+                HandlePaddleCollision(paddle2, ball, gameTime);
+            }
+        }
+
+
+        private void HandlePaddleCollision(Paddle paddle, Ball ball, GameTime gameTime)
+        {
+            Debug.WriteLine($"Ball position: {ball.Position}, Paddle position: {paddle.Position}");
+
+            ball.Velocity.X = -ball.Velocity.X;
+
+            var relativeIntersectY = paddle.Position.Y - ball.Position.Y;
+            var normalizedRelativeIntersectionY = relativeIntersectY / (paddle.Texture.Height / 2);
+            var bounceAngle = normalizedRelativeIntersectionY * MaxBounceAngle;
+
+            bool ballOnLeftSide = ball.Position.X < paddle.Position.X + paddle.Texture.Width / 2;
+
+            if (ballOnLeftSide)
+            {
+                ball.Velocity.X = -(float)(BallSpeed * Math.Cos(bounceAngle));
+            }
+            else
+            {
+                ball.Velocity.X = (float)(BallSpeed * Math.Cos(bounceAngle));
+            }
+            ball.Velocity.Y = (float)(BallSpeed * -Math.Sin(bounceAngle));
+
+
+            // Move the ball to the edge of the paddle to avoid multiple collisions
+            if (ball.Velocity.X > 0)
+            {
+                ball.Position.X = paddle.Position.X + (paddle.Texture.Width / 2) + (ball.Texture.Width / 2);
+            }
+            else
+            {
+                ball.Position.X = paddle.Position.X - (ball.Texture.Width / 2);
+            }
+            Debug.WriteLine($"Bounce angle: {bounceAngle}, Ball velocity: {ball.Velocity}");
+        }
+        private float map(float x, float a, float b, float p, float q)
+        {
+            return p + (x - a) * (q - p) / (b - a);
+        }
+
+        private void HandleBallOffScreen()
+        {
+            if (ball.Position.X < 0) // Left side
+            {
+                scorePlayer2++;
+                currentState = GameState.Scored;
+                ResetBall();
+            }
+            else if (ball.Position.X > _graphics.PreferredBackBufferWidth) // Right side
+            {
+                scorePlayer1++;
+                currentState = GameState.Scored;
+                ResetBall();
+            }
+        }
+
+        private void ResetBall()
+        {
+            // Position the ball back at the center
+            ball.Position = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+            ball.Velocity = Vector2.Zero;  // Stop the ball
+            currentState = GameState.WaitingToStart;
         }
     }
 }
