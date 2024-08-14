@@ -5,12 +5,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using AbstractGame;
 
 namespace _2048Game
 {
-    public class _2048Engine
+    public class _2048Engine : ConsoleGame
     {
         private Random Random = RandomSingleton.Instance;
+
         public _2048Engine()
         {
             board = new int[16];
@@ -19,78 +21,75 @@ namespace _2048Game
                 board[i] = 0;
             }
         }
-        public void StartAndRunGame()
+        public override void InitializeGame()
         {
-            GenerateNewNumbers();
-            int[] board1 = new int[16] { 0,0,0,4,
-                                         0,0,0,4,
-                                         0,0,0,2,
-                                         0,0,0,2};
-            int[] board2 = new int[16] { 0,0,0,2,
-                                         0,0,2,2,
-                                         0,2,2,2,
-                                         2,2,2,2};
-            int[] board3 = new int[16] { 2,0,2,0,
-                                         0,0,0,0,
-                                         0,0,0,0,
-                                         2,0,0,2};
-            int[] board4 = new int[16] { 2,0,0,2,
-                                         0,0,0,0,
-                                         0,0,0,0,
-                                         2,0,0,2};
-            int[] board5 = new int[16] { 8,4,0,0,
-                                         0,0,0,0,
-                                         0,0,0,0,
-                                         2,0,0,2};
-            //board = board5;
-            PrintBoard();
-            while (!IsGameOver()) 
-                PlayRound();
+            Console.Clear();
+            board = new int[BOARD_SIZE];
+            HighScore = 0;
+            first_free_cursor_line = 11;
 
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new String(' ', Console.BufferWidth));
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.WriteLine("Game Over!");
-            return;
+            GenerateNewNumbers();
+            PrintBoard();
+            PrintValues();
+        }
+        public override void RunGame()
+        {
+            while (true)
+            {
+                PlayRound();
+                if (IsGameOver()) break;
+            }
+            GameOver();
+        }
+        public override void CleanUp()
+        {
+            Console.SetCursorPosition(0, COMMUNICATION_LINE.top + 1);
+            while (Console.KeyAvailable) Console.ReadKey(true);
+        }
+        private void GameOver()
+        {
+            ClearConsoleBuffer(COMMUNICATION_LINE.top);
+            Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
+            Console.WriteLine(GAME_OVER_MESSAGE + SPACE_TO_CONTINUE);
+
+            while (Console.ReadKey(true).KeyChar != ' ');
         }
         private void PlayRound()
         {
             MovePieces(GetMoveDirection());
             GenerateNewNumbers();
-            PrintBoard();
+            PrintValues();
+            UpdateHighScore();
         }
         private char GetMoveDirection()
         {
             char direction = ' ';
 
-            Console.Write("Enter a direction (W, A, S, D): ");
+            Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
+            Console.Write(ENGLISH_DIRECTIONS);
             while (true)
             {
                 direction = Console.ReadKey().KeyChar;
-                if (direction == 'w' || direction == 'a' || direction == 's' || direction == 'd')
-                {
-                    Console.WriteLine();
-                    break;
-                }
-                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                if (ENGLISH_DIRECTIONS.ToLower().Contains(direction)) break;
+                else Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
             }
 
             return direction;
         }
         private void MovePieces(char direction)
         {
-            switch (direction)
+            switch (char.ToUpper(direction))
             {
-                case 'w':
+                case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.t:
                     MoveUp();
                     break;
-                case 'a':
+                case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.l:
                     MoveLeft();
                     break;
-                case 's':
+                case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.d:
                     MoveDown();
                     break;
-                case 'd':
+                case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.r:
                     MoveRight();
                     break;
             }
@@ -214,6 +213,22 @@ namespace _2048Game
             }
             lineCell = inputLineCells;
         }
+        private void PrintHighScore()
+        {
+            SetCellColor(HighScore);
+            Console.SetCursorPosition(HIGH_SCORE_LINE.left, HIGH_SCORE_LINE.top);
+            Console.WriteLine(HIGH_SCORE_MESSAGE + HighScore);
+            Console.ResetColor();
+
+        }
+        private void UpdateHighScore()
+        {
+            if (board.Max() > HighScore)
+            {
+                HighScore = board.Max();
+                PrintHighScore();
+            }
+        }
         private void GenerateNewNumbers()
         {
 
@@ -260,23 +275,29 @@ namespace _2048Game
                 {
                     Console.WriteLine("╠══════╬══════╬══════╬══════╣");
                 }
-                Console.Write("║");
-
-                SetCellColor(board[i]);
-                string cellValue = board[i] == 0 ? "." : board[i].ToString();
-                Console.Write("{0,5} ", cellValue);
-
-                Console.ResetColor();
-
+                Console.Write("║      ");
                 if ((i + 1) % 4 == 0)
                 {
                     Console.WriteLine("║");
                 }
             }
-
             Console.WriteLine("╚══════╩══════╩══════╩══════╝");
+            PrintHighScore();
         }
-
+        private void PrintValues()
+        {
+            Console.SetCursorPosition(0, 0);
+            int index = 0;
+            foreach (var item in board)
+            {
+                Console.SetCursorPosition(BOARD_CURSER_LOCATIONS[index].left, BOARD_CURSER_LOCATIONS[index].top);
+                SetCellColor(item);
+                string cellValue = item == 0 ? "." : item.ToString();
+                Console.Write("{0,5} ", cellValue);
+                Console.ResetColor();
+                index++;
+            }
+        }
         private void SetCellColor(int value)
         {
             // Change the color based on the cell value
@@ -303,31 +324,36 @@ namespace _2048Game
             else
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
         }
-
-
         private void DebugPrintBoard()
         {
-            for (int i = 0; i < 16; i++)
-            {
-                if (board[i] == 0)
-                {
-                    Console.Write("    .");
-                }
-                else
-                {
-                    Console.Write("{0,5}", board[i]);
-                }
-                if ((i + 1) % 4 == 0)
-                {
-                    Console.WriteLine();
-                }
-            }
-            Console.WriteLine("-------------------------");
+            PrintBoard();
+            PrintValues();
+        }
+        private void ClearConsoleBuffer(int top)
+        {
+            Console.SetCursorPosition(0, top);
+            Console.Write(new String(' ', Console.BufferWidth));
         }
 
+
         private int[] board;
+        private int HighScore = 0;
+
+
+
         private const int BOARD_SIZE = 16;
         private const int ROW_COUNT = 4;
         private const int COLUMN_COUNT = 4;
+        private readonly (int left, int top)[] BOARD_CURSER_LOCATIONS = { (1,1), (8,1), (15,1), (22,1),
+                                                                 (1,3), (8,3), (15,3), (22,3),
+                                                                 (1,5), (8,5), (15,5), (22,5),
+                                                                 (1,7), (8,7), (15,7), (22,7) };
+        private readonly (int left, int top) COMMUNICATION_LINE = (0, 10);
+        private readonly (int left, int top) HIGH_SCORE_LINE = (0, 9);
+        private const string ENGLISH_DIRECTIONS = "Enter a direction (W, A, S, D): ";
+        private const string HIGH_SCORE_MESSAGE = "High Score: ";
+        private readonly (char t, char l, char d, char r) QWERTY_DEFAULT_DIRECTION_KEYS = ('W', 'A', 'S', 'D');
+        private const string GAME_OVER_MESSAGE = "Game Over! ";
+        private const string SPACE_TO_CONTINUE = "Press space to continue...";
     }
 }

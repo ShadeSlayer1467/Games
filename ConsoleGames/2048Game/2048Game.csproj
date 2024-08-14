@@ -45,5 +45,11 @@
     <Compile Include="_2048Engine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BasicGameInterface\AbstractGame.csproj">
+      <Project>{fb3243d7-b17c-421f-b1f0-90ca589de78b}</Project>
+      <Name>AbstractGame</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

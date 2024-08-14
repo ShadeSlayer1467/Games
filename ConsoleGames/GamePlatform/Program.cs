@@ -11,21 +11,8 @@ namespace GamePlatform
     {
         static void Main(string[] args)
         {
-            while (true)
-            {
-                _2048Engine game = new _2048Engine();
-                game.StartAndRunGame();
-
-                Console.WriteLine("Do you want to play again? (Y/N)");
-                string response = Console.ReadLine();
-
-                if (response.ToLower() != "y")
-                {
-                    break;
-                }
-            }
-
-            Console.ReadKey();
+            GamesEngine engine = new GamesEngine();
+            engine.Run();
         }
     }
 }
