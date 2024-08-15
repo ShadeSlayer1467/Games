@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AbstractGame;
+using TikTacToe;
 
 namespace GamePlatform
 {
@@ -31,7 +32,7 @@ namespace GamePlatform
                 case '1':
                     return new _2048Engine();
                 case '2':
-                    return new _2048Engine(); //TicTacToeEngine();
+                    return new TikTacToeEngine();
                 case '3':
                     return new _2048Engine(); //ConnectFourEngine();
                 case '4':

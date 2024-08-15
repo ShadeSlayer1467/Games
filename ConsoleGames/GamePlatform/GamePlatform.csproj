@@ -61,6 +61,10 @@
       <Project>{fb3243d7-b17c-421f-b1f0-90ca589de78b}</Project>
       <Name>AbstractGame</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TikTacToe\TikTacToe.csproj">
+      <Project>{fc9949cf-4aee-4b89-a819-894955ce219f}</Project>
+      <Name>TikTacToe</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
