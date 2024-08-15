@@ -110,17 +110,6 @@ namespace TikTacToe
                 // move cursor around board
                 while (true)
                 {
-                    Thread testLocks = new Thread(() =>
-                    {
-                        while (true)
-                        {
-                            lock (_Cursorlock)
-                            {
-                                Console.SetCursorPosition(COMMUNICATION_LINE.l, COMMUNICATION_LINE.t + 3);
-                            }
-                        }
-                    });
-                    testLocks.Start();
                     char direction = GetMoveDirection();
                     _keepFlashing = false;
                     flashThread.Join();
