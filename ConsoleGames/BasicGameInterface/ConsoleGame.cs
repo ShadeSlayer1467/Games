@@ -11,7 +11,5 @@ namespace AbstractGame
         public abstract void InitializeGame();
         public abstract void RunGame();
         public abstract void CleanUp();
-
-        public int first_free_cursor_line = 0;
     }
 }

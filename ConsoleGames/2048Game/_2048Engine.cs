@@ -11,8 +11,6 @@ namespace _2048Game
 {
     public class _2048Engine : ConsoleGame
     {
-        private Random Random = RandomSingleton.Instance;
-
         public _2048Engine()
         {
             board = new int[16];
@@ -24,9 +22,9 @@ namespace _2048Game
         public override void InitializeGame()
         {
             Console.Clear();
+            Console.Title = "2048 Game";
             board = new int[BOARD_SIZE];
             HighScore = 0;
-            first_free_cursor_line = 11;
 
             GenerateNewNumbers();
             PrintBoard();
@@ -70,7 +68,7 @@ namespace _2048Game
             while (true)
             {
                 direction = Console.ReadKey().KeyChar;
-                if (ENGLISH_DIRECTIONS.ToLower().Contains(direction)) break;
+                if (QWERTY_DEFAULT_DIRECTION_KEYS.ToString().ToLower().Contains(direction)) break;
                 else Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
             }
 
@@ -335,9 +333,9 @@ namespace _2048Game
             Console.Write(new String(' ', Console.BufferWidth));
         }
 
-
         private int[] board;
         private int HighScore = 0;
+        private Random Random = RandomSingleton.Instance;
 
 
 
