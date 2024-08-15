@@ -1,5 +1,5 @@
 connect 4
 snake
 
-
-test for buffered output
+installer?
+desktop shortcut?
