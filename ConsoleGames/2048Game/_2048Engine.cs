@@ -6,9 +6,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using AbstractGame;
+using BasicGameInterface;
 
 namespace _2048Game
 {
+    [GameName("2048 Game")]
     public class _2048Engine : ConsoleGame
     {
         public _2048Engine()

@@ -6,9 +6,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AbstractGame;
+using BasicGameInterface;
 
 namespace TikTacToe
 {
+    [GameName("Tic Tac Toe")]
     public class TikTacToeEngine : ConsoleGame
     {
         public string Player1 { get; set; }

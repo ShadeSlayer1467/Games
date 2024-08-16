@@ -13,6 +13,7 @@ namespace GamePlatform
         static void Main(string[] args)
         {
             Console.Title = "Game Platform";
+            Console.CursorVisible = false;
             GamesEngine engine = new GamesEngine();
             engine.Run();
         }
