@@ -87,8 +87,8 @@ namespace GamePlatform
         }
         private List<(Type type, string Name)> GetDLLTypes()
         {
-            List<Assembly> assemblies = new List<Assembly>() { Assembly.GetExecutingAssembly() };
-            assemblies.Concat((LoadAllDLLAssemblies()).AsEnumerable());
+            List<Assembly> assemblies = LoadAllDLLAssemblies();
+            assemblies.Add(Assembly.GetExecutingAssembly());
 
             var gameTypes = assemblies.SelectMany(assembly => assembly.GetTypes())
                           .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
