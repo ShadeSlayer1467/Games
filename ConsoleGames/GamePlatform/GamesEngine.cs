@@ -87,20 +87,14 @@ namespace GamePlatform
         }
         private List<(Type type, string Name)> GetDLLTypes()
         {
-            List<Assembly> assemblies = LoadAllDLLAssemblies();
-            List<(Type type, string Name)> gameTypes = new List<(Type type, string Name)>();
-            foreach (Assembly assembly in assemblies)
-            {
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (type.IsSubclassOf(typeof(ConsoleGame)))
-                    {
-                        var nameAttribute = type.GetCustomAttribute<GameNameAttribute>();
-                        string displayName = nameAttribute?.Name ?? type.Name;
-                        gameTypes.Add((type, displayName));
-                    }
-                }
-            }
+            List<Assembly> assemblies = new List<Assembly>() { Assembly.GetExecutingAssembly() };
+            assemblies.Concat((LoadAllDLLAssemblies()).AsEnumerable());
+
+            var gameTypes = assemblies.SelectMany(assembly => assembly.GetTypes())
+                          .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
+                          .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name))
+                          .ToList();
+
             return gameTypes;
         }
         private List<Assembly> LoadAllDLLAssemblies()
