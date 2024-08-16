@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace BasicGameInterface
 {
+    // Name Used to display the game in the menu when selecting a game to play
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class GameNameAttribute : Attribute
     {
