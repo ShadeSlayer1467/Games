@@ -1,6 +1,6 @@
-# Console and MonoGame Games Collection
+# Console Games Collection
 
-Welcome to the Console and MonoGame Games Collection! This repository contains a series of games developed in C#, featuring both classic console games and MonoGame implementations. The games are simple yet fun, offering an engaging experience right in your console window.
+Welcome to My Console Games Collection! This repository contains a series of games developed in C#, featuring classic games in the console. The games are simple yet fun, offering an engaging experience right in your console window.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Welcome to the Console and MonoGame Games Collection! This repository contains a
 
 ## About the Project
 
-This project is a collection of various games implemented in C#. The goal is to create fun and interactive games that run directly in the console, as well as plans to add more complex games using MonoGame. Whether you're just starting out or simply exploring game development in C#, join me on this journey as we learn and build fun, interactive games together.
+This project is a collection of various games implemented in C#. The goal is to create fun and interactive games that run directly in the console. Whether you're just starting out or simply exploring game development in C#, join me on this journey as we learn and build fun, interactive games together.
 
 ## Games Included
 
@@ -37,7 +37,6 @@ You can download the latest version of the games as standalone executables from 
 To run these games, you need:
 
 - [.NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/net472) or higher for console games.
-- [.NET Core 6.0](https://dotnet.microsoft.com/download/dotnet/6.0) for MonoGame projects.
 
 ### Installation
 
@@ -63,12 +62,9 @@ To run these games, you need:
 
 ## Project Structure
 
-The repository is organized into several projects, each representing a different game:
-
 - **2048Game**: Contains the implementation of the 2048 game.
 - **TikTacToe**: Contains the implementation of the Tic Tac Toe game.
 - **GamePlatform**: A central project that ties all games together, providing a menu-based interface.
-- **Pong**: A MonoGame project for a Pong game.
 
 Each project is self-contained, making it easy to navigate and understand the code.
 
@@ -90,4 +86,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Matthew Read - [shadeslayer1467@gmail.com](mailto:shadeslayer1467@gmail.com)
 
-Project Link: [https://github.com/ShadeSlayer1467/Games](https://github.com/ShadeSlayer1467/YourRepositoryName)
+Project Link: [https://github.com/ShadeSlayer1467/Games](https://github.com/ShadeSlayer1467/Games)
