@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using AbstractGame;
 using TikTacToe;
+using System.Reflection;
+using BasicGameInterface;
 
 namespace GamePlatform
 {
@@ -27,40 +29,45 @@ namespace GamePlatform
         }
         private ConsoleGame SelectGame()
         {
-            switch (SelectGameMenu())
-            {
-                case '1':
-                    return new _2048Engine();
-                case '2':
-                    return new TikTacToeEngine();
-                case '3':
-                    return new _2048Engine(); //ConnectFourEngine();
-                case '4':
-                    Environment.Exit(0);
-                    break;
-            }
-            return new _2048Engine();
+            Type game = SelectGameMenuType();
+            return (ConsoleGame)Activator.CreateInstance(game);
         }
-        private char SelectGameMenu()
+        private Type SelectGameMenuType()
         {
-            string[] options = new string[] { "1", "2", "3", "4" };
             char response = ' ';
-            Console.WriteLine(SELECT_GAME_MENU);
+            StringBuilder SelectGameMenuBuilder = new StringBuilder(SELECT_GAME_MENU).AppendLine();
+            List<(Type type, string Name)> types = GetDLLTypes();
+            if (types.Count == 0)
+            {
+                Console.WriteLine("No games found. Press any key to exit.");
+                Console.ReadKey();
+                Environment.Exit(0);
+            }
+            for (int i = 0; i < types.Count; i++)
+            {
+                SelectGameMenuBuilder.AppendLine($"{(char)('a' + i)}. {types[i].Name} ");
+            }
+            SelectGameMenuBuilder.AppendLine(EXIT_MENU_OPTION_KEY + ". " + EXIT_MENU_OPTION);
+            Console.SetCursorPosition(SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
+            Console.WriteLine(SelectGameMenuBuilder.ToString());
             Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             while (true)
             {
-                response = Console.ReadKey().KeyChar;
-                if (options.Contains(response.ToString()))
+                response = Console.ReadKey(true).KeyChar;
+                if (response == EXIT_MENU_OPTION_KEY[0])
+                {
+                    Environment.Exit(0);
+                }
+                if (response >= 'a' && response <= 'z' && response - 'a' < types.Count)
                 {
                     break;
                 }
+                // invalid input
                 Console.SetCursorPosition(SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-                Console.WriteLine(SELECT_GAME_MENU);
-                Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
-                Console.WriteLine(INVALID_INPUT);
+                Console.WriteLine(SelectGameMenuBuilder.ToString());
                 Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             }
-            return response;
+            return types[response - 'a'].type;
         }
         private bool PlayAgainPrompt()
         {
@@ -78,11 +85,40 @@ namespace GamePlatform
             Console.SetCursorPosition(0, top);
             Console.Write(new String(' ', Console.BufferWidth));
         }
+        private List<(Type type, string Name)> GetDLLTypes()
+        {
+            List<Assembly> assemblies = LoadAllDLLAssemblies();
+            List<(Type type, string Name)> gameTypes = new List<(Type type, string Name)>();
+            foreach (Assembly assembly in assemblies)
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.IsSubclassOf(typeof(ConsoleGame)))
+                    {
+                        var nameAttribute = type.GetCustomAttribute<GameNameAttribute>();
+                        string displayName = nameAttribute?.Name ?? type.Name;
+                        gameTypes.Add((type, displayName));
+                    }
+                }
+            }
+            return gameTypes;
+        }
+        private List<Assembly> LoadAllDLLAssemblies()
+        {
+            List<Assembly> assemblies = new List<Assembly>();
+            foreach (string file in System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.dll"))
+            {
+                assemblies.Add(Assembly.LoadFile(file));
+            }
+            return assemblies;
+        }
 
         private readonly (int left, int top) SELECT_GAME_MENU_C = (0, 0);
-        private const string SELECT_GAME_MENU = "Select a game to play: \n1. 2048\n2. Tic Tac Toe\n3. Connect Four\n4. Exit";
+        private const string SELECT_GAME_MENU = "Select a game to play: ";
         private readonly (int left, int top) SELECT_GAME_INPUT = (23,0);
         private const string INVALID_INPUT = " <-Invalid input. Please try again.";
+        private const string EXIT_MENU_OPTION_KEY = "1";
+        private const string EXIT_MENU_OPTION = "Exit";
         private const string PLAY_AGAIN_PROMPT = "Do you want to play again? (Y/N): ";
         private const string PLAY_AGAIN_YES = "y";
     }
