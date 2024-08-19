@@ -9,9 +9,9 @@ using TikTacToe;
 using System.Reflection;
 using BasicGameInterface;
 
-namespace GamePlatform
+namespace GameEngine
 {
-    internal class GamesEngine
+    internal class ConsoleEngine
     {
         internal void Run()
         {
