@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GamePlatform
+namespace GameEngine
 {
     internal class Program
     {
@@ -14,7 +14,7 @@ namespace GamePlatform
         {
             Console.Title = "Game Platform";
             Console.CursorVisible = false;
-            GamesEngine engine = new GamesEngine();
+            ConsoleEngine engine = new ConsoleEngine();
             engine.Run();
         }
     }

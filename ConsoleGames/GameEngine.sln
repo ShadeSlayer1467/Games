@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33801.468
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractGame", "BasicGameInterface\AbstractGame.csproj", "{FB3243D7-B17C-421F-B1F0-90CA589DE78B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{E994050B-8116-453A-AFB8-237B67B4EFCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		DLLGames|Any CPU = DLLGames|Any CPU
+		NativeGames|Any CPU = NativeGames|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.DLLGames|Any CPU.ActiveCfg = DLLGames|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.DLLGames|Any CPU.Build.0 = DLLGames|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.NativeGames|Any CPU.ActiveCfg = NativeGames|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.NativeGames|Any CPU.Build.0 = NativeGames|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB3243D7-B17C-421F-B1F0-90CA589DE78B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.DLLGames|Any CPU.ActiveCfg = DLLGames|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.DLLGames|Any CPU.Build.0 = DLLGames|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.NativeGames|Any CPU.ActiveCfg = NativeGames|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.NativeGames|Any CPU.Build.0 = NativeGames|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E994050B-8116-453A-AFB8-237B67B4EFCA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D3AC3893-09C8-4429-8856-D94B9FE43912}
+	EndGlobalSection
+EndGlobal
