@@ -78,6 +78,7 @@ namespace GameEngine
                 Console.WriteLine(SelectGameMenuBuilder.ToString());
                 Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             }
+            Console.Title = types[response - 'a'].Name;
             return types[response - 'a'].type;
         }
         private Type NativeSelectGameMenuType()
