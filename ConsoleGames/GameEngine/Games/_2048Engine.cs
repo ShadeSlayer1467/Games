@@ -16,16 +16,15 @@ namespace _2048Game
         public _2048Engine()
         {
             board = new int[16];
-            for (int i = 0; i < 16; i++)
-            {
-                board[i] = 0;
-            }
         }
         public override void InitializeGame()
         {
             Console.Clear();
-            Console.Title = "2048 Game";
-            board = new int[BOARD_SIZE];
+            board = new int[16];
+            for (int i = 0; i < 16; i++)
+            {
+                board[i] = 0;
+            }
             HighScore = 0;
 
             GenerateNewNumbers();
