@@ -11,18 +11,54 @@ namespace Connect4
 {
     internal class Board
     {
-        public Slot[] slots = new Slot[42];
+        public Slot[] slots;
+        public int COLUMNS { get; private set; }
+        public int ROWS { get; private set; }
         public Slot this[int row, int col] => GetSlot(row, col);
+        public Board(int Rows = 6, int Columns = 7)
+        {
+            if (Columns <= 0 || Rows <= 0)
+            {
+                throw new ArgumentException("Columns and rows must be greater than zero.");
+            }
+            COLUMNS = Columns;
+            ROWS = Rows;
+            slots = new Slot[COLUMNS * ROWS];
+            for (int i = 0; i < Columns * Rows; i++)
+            {
+                slots[i] = new Slot();
+                slots[i].Row = i / COLUMNS;
+                slots[i].Column = i % ROWS;
+                slots[i].Player = Slot.DEFAULT_PLAYER;
+            }
+        }
         public Slot GetSlot(int row, int col)
         {
             if (row >= 0 && row < ROWS &&
                 col >= 0 && col < COLUMNS)
                 return slots[row * COLUMNS + col];
             else
-                return new Slot() { Player = -1, Row = -1, Column = -1 };
+                return Slot.INVALID_SLOT;
         }
         public Slot[] Row(int row) => Enumerable.Range(0, COLUMNS).Select(col => this[row, col]).ToArray();
         public Slot[] Column(int col) => Enumerable.Range(0, ROWS).Select(row => this[row, col]).ToArray();
+        public (Slot[] asc, Slot[] desc) GetPieceDiagonal(Slot slot)
+        {
+            int row = slot.Row;
+            int col = slot.Column;
+            List<Slot> ascending = new List<Slot>();
+            List<Slot> descending = new List<Slot>();
+
+            for (int offset = 0; row + offset < ROWS; offset++)
+            {
+                Slot next = this[row + offset, col + offset];
+                if (next.IsValid()) descending.Add(next);
+
+                next = this[row + offset, col - offset];
+                if (next.IsValid()) ascending.Add(next);
+            }
+            return (ascending.ToArray(), descending.ToArray());
+        }
 
         public List<Slot[]> Diagonals()
         {
@@ -40,13 +76,13 @@ namespace Connect4
                     if (column + columnOffset < COLUMNS)
                     {
                         Slot nextRight = this[row, column + columnOffset];
-                        if (nextRight.IsValidSlot()) descendingDiagonal.Add(nextRight);
+                        if (nextRight.IsValid()) descendingDiagonal.Add(nextRight);
                     }
 
                     if (column - columnOffset >= 0)
                     {
                         Slot nextLeft = this[row, column - columnOffset];
-                        if (nextLeft.IsValidSlot()) ascendingDiagonal.Add(nextLeft);
+                        if (nextLeft.IsValid()) ascendingDiagonal.Add(nextLeft);
                     }
                 }
 
@@ -72,16 +108,7 @@ namespace Connect4
 
             return diagonals;
         }
-        public Board()
-        {
-            for (int i = 0; i < 42; i++)
-            {
-                slots[i] = new Slot();
-                slots[i].Row = i / COLUMNS;
-                slots[i].Column = i % COLUMNS;
-            }
-        }
-        internal bool PlacePiece(int column, int currentPlayer)
+        internal bool TryPlacePiece(int column, int currentPlayer, out Slot piece)
         {
             Slot bottom = null;
             for (int row = 0; row < ROWS; row++)
@@ -92,16 +119,18 @@ namespace Connect4
                 }
                 else break;
             }
-            if (bottom == null) return false;
+            if (bottom == null)
+            {
+                piece = Slot.INVALID_SLOT; 
+                return false;
+            }
 
             bottom.Player = currentPlayer;
+            piece = bottom;
             return true;
         }
+        internal const int DEFAULT_PLAYER = Slot.DEFAULT_PLAYER;
 
-        private const int COLUMNS = 7;
-        private const int ROWS = 6;
-        private const int WIN_CONDITION = 4;
-        private const int DEFAULT_PLAYER = Slot.DEFAULT_PLAYER;
-
+        internal const int WIN_CONDITION = 4;
     }
 }
