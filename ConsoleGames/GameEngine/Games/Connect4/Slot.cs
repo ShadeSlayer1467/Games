@@ -13,9 +13,14 @@ namespace Connect4
         public int Player { get; set; }
         public Slot() 
         {
-            Player = 0;
+            Player = DEFAULT_PLAYER;
             Row = 0;
             Column = 0;
         }
+        public bool IsValidSlot() => Player != INVALID_PLAYER;
+        public bool IsPlayerOwned => Player != DEFAULT_PLAYER && Player != INVALID_PLAYER;
+
+        public const int DEFAULT_PLAYER = 0;
+        public const int INVALID_PLAYER = -1;
     }
 }

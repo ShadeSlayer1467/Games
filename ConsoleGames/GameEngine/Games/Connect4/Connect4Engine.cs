@@ -27,11 +27,24 @@ namespace Connect4
         }
         public override void RunGame()
         {
-            while (true) PlayRound();
+            do PlayRound(); while (!CheckForWinner());
+            GameOver();
+        }
+
+        private void GameOver()
+        {
+            lock (lockObject)
+            {
+                Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
+                Console.WriteLine((winner == 1) ? PLAYER1_WIN : 
+                                  (winner == 2) ? PLAYER2_WIN : TIE);
+            }
+            while (Console.ReadKey(true).KeyChar != ' ');
         }
         public override void CleanUp()
         {
-            throw new NotImplementedException();
+            Console.SetCursorPosition(0, COMMUNICATION_LINE.top + 1);
+            while (Console.KeyAvailable) Console.ReadKey(true);
         }
         private void PlayRound()
         {
@@ -53,12 +66,11 @@ namespace Connect4
                 else
                 {
                     PrintBoard();
-                    currentPlayer = currentPlayer == 1 ? 2 : 1;
+                    currentPlayer = (currentPlayer == 1) ? 2 : 1;
                 }
             }
             while (!validMove);
         }
-
         private int GetPlayerInput()
         {
             int columnInt;
@@ -121,6 +133,49 @@ namespace Connect4
                 Console.WriteLine(sb.ToString());
             }
         }
+        private bool CheckForWinner()
+        {
+            Slot[] slots;
+
+            // Horizontal
+            for (int row = 0; row < 6; row++)
+            {
+                slots = board.Row(row);
+                if (ContainsWinner(slots)) return true;
+            }
+
+            // Vertical
+            for (int col = 0; col < 7; col++)
+            {
+                slots = board.Column(col);
+                if (ContainsWinner(slots)) return true;
+            }
+
+            // Diagonal
+            foreach (Slot[] list in board.Diagonals())
+            {
+                if (ContainsWinner(list)) return true;
+            }
+
+            return false;
+        }
+        private bool ContainsWinner(Slot[] slots)
+        {
+            if (slots.Length < 4) return false;
+            // sliding window of 4
+            for (int i = 0; i < slots.Length - 3; i++)
+            {
+                if (slots[i].Player != 0 &&
+                    slots[i].Player == slots[i + 1].Player &&
+                    slots[i + 1].Player == slots[i + 2].Player &&
+                    slots[i + 2].Player == slots[i + 3].Player)
+                {
+                    winner = slots[i].Player;
+                    return true;
+                }
+            }
+            return false;
+        }
 
 
 
@@ -129,6 +184,9 @@ namespace Connect4
 
         private const string INSTRTUCTIONS = "Enter a column number to place your piece. 1-7";
         private const string INVALID_MOVE = "Invalid. Try again. ";
+        private const string PLAYER1_WIN = "Player 1 wins! Press space to continue";
+        private const string PLAYER2_WIN = "Player 2 wins! Press space to continue";
+        private const string TIE = "It's a tie! Press space to continue";
 
     }
 }
