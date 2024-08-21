@@ -5,6 +5,7 @@ Base Engine:
 -Reflection
 --Naming Conventions
 --Game Select menu can only go up to 26 (a-z)
+--refactor player input (GetInput(...,char[] acceptable inputs)
 
 Release:
 installer?
