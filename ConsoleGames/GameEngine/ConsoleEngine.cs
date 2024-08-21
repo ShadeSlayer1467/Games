@@ -29,12 +29,13 @@ namespace GameEngine
         }
         private ConsoleGame SelectGame()
         {
-            Type game = NativeSelectGameMenuType();
+            Func<Type> SelectMenu = NativeSelectGameMenuType;
 #if INCLUDE_NATIVE_GAMES
-                 game = NativeSelectGameMenuType();
+            SelectMenu = NativeSelectGameMenuType;
 #elif ENABLE_REFLECTION
-                 game = ReflectionSelectGameMenuType();
+                 SelectMenu = ReflectionSelectGameMenuType;
 #endif
+            Type game = SelectMenu();
 
             return (ConsoleGame)Activator.CreateInstance(game);
         }
