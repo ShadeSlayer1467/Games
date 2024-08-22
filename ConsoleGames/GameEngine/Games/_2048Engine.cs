@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AbstractGame;
 using BasicGameInterface;
+using GamePlatform.Utilities;
 
 namespace _2048Game
 {
@@ -16,15 +17,16 @@ namespace _2048Game
         public _2048Engine()
         {
             board = new int[16];
-        }
-        public override void InitializeGame()
-        {
-            Console.Clear();
-            board = new int[16];
             for (int i = 0; i < 16; i++)
             {
                 board[i] = 0;
             }
+        }
+        public override void InitializeGame()
+        {
+            GameConsoleUI.ClearConsole();
+            GameConsoleUI.Title = "2048 Game";
+            board = new int[BOARD_SIZE];
             HighScore = 0;
 
             GenerateNewNumbers();
@@ -42,16 +44,15 @@ namespace _2048Game
         }
         public override void CleanUp()
         {
-            Console.SetCursorPosition(0, COMMUNICATION_LINE.top + 1);
-            while (Console.KeyAvailable) Console.ReadKey(true);
+            GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP + 1);
+            GameConsoleUI.FlushKeyBuffer();
         }
         private void GameOver()
         {
-            ClearConsoleBuffer(COMMUNICATION_LINE.top);
-            Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
-            Console.WriteLine(GAME_OVER_MESSAGE + SPACE_TO_CONTINUE);
-
-            while (Console.ReadKey(true).KeyChar != ' ');
+            GameConsoleUI.ClearConsoleLineBuffer(COMMUNICATION_LINE_TOP);
+            GameConsoleUI.WriteLine(GAME_OVER_MESSAGE + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
+            
+            while (GameConsoleUI.ReadKeyChar(true) != ' ');
         }
         private void PlayRound()
         {
@@ -62,15 +63,18 @@ namespace _2048Game
         }
         private char GetMoveDirection()
         {
-            char direction = ' ';
+            char direction;
 
-            Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
-            Console.Write(ENGLISH_DIRECTIONS);
+            GameConsoleUI.WriteLine(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
             while (true)
             {
-                direction = Console.ReadKey().KeyChar;
+                direction = GameConsoleUI.ReadKeyChar(false);
                 if (QWERTY_DEFAULT_DIRECTION_KEYS.ToString().ToLower().Contains(direction)) break;
-                else Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                else
+                {
+                    (int left, int top) c = GameConsoleUI.GetConsoleCursorPosition();
+                    GameConsoleUI.SetCursorPosition(c.left - 1, c.top);
+                }
             }
 
             return direction;
@@ -215,9 +219,8 @@ namespace _2048Game
         private void PrintHighScore()
         {
             SetCellColor(HighScore);
-            Console.SetCursorPosition(HIGH_SCORE_LINE.left, HIGH_SCORE_LINE.top);
-            Console.WriteLine(HIGH_SCORE_MESSAGE + HighScore);
-            Console.ResetColor();
+            GameConsoleUI.WriteLine(HIGH_SCORE_MESSAGE + HighScore, HIGH_SCORE_LINE_TOP);
+            GameConsoleUI.ResetColor();
 
         }
         private void UpdateHighScore()
@@ -265,35 +268,34 @@ namespace _2048Game
         }
         private void PrintBoard()
         {
-            Console.SetCursorPosition(0, 0);
-            Console.WriteLine("╔══════╦══════╦══════╦══════╗");
+            GameConsoleUI.WriteLine("╔══════╦══════╦══════╦══════╗", 0, 0);
 
             for (int i = 0; i < 16; i++)
             {
                 if (i % 4 == 0 && i != 0)
                 {
-                    Console.WriteLine("╠══════╬══════╬══════╬══════╣");
+                    GameConsoleUI.WriteLine("╠══════╬══════╬══════╬══════╣");
                 }
-                Console.Write("║      ");
+                GameConsoleUI.Write("║      ");
                 if ((i + 1) % 4 == 0)
                 {
-                    Console.WriteLine("║");
+                    GameConsoleUI.WriteLine("║");
                 }
             }
-            Console.WriteLine("╚══════╩══════╩══════╩══════╝");
+            GameConsoleUI.WriteLine("╚══════╩══════╩══════╩══════╝");
             PrintHighScore();
         }
         private void PrintValues()
         {
-            Console.SetCursorPosition(0, 0);
+            GameConsoleUI.SetCursorPosition(0,0);
             int index = 0;
             foreach (var item in board)
             {
-                Console.SetCursorPosition(BOARD_CURSER_LOCATIONS[index].left, BOARD_CURSER_LOCATIONS[index].top);
+                GameConsoleUI.SetCursorPosition(BOARD_CURSER_LOCATIONS[index].left, BOARD_CURSER_LOCATIONS[index].top);
                 SetCellColor(item);
                 string cellValue = item == 0 ? "." : item.ToString();
-                Console.Write("{0,5} ", cellValue);
-                Console.ResetColor();
+                GameConsoleUI.Write("{0,5} ", cellValue);
+                GameConsoleUI.ResetColor();
                 index++;
             }
         }
@@ -301,27 +303,27 @@ namespace _2048Game
         {
             // Change the color based on the cell value
             if (value == 0)
-                Console.ForegroundColor = ConsoleColor.Gray;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Gray;
             else if (value <= 4)
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Cyan;
             else if (value <= 8)
-                Console.ForegroundColor = ConsoleColor.Blue;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Blue;
             else if (value <= 16)
-                Console.ForegroundColor = ConsoleColor.Green;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Green;
             else if (value <= 32)
-                Console.ForegroundColor = ConsoleColor.Magenta;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Magenta;
             else if (value <= 64)
-                Console.ForegroundColor = ConsoleColor.Red;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Red;
             else if (value <= 128)
-                Console.ForegroundColor = ConsoleColor.Yellow;
+                GameConsoleUI.ForegroundColor = ConsoleColor.Yellow;
             else if (value <= 256)
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                GameConsoleUI.ForegroundColor = ConsoleColor.DarkYellow;
             else if (value <= 512)
-                Console.ForegroundColor = ConsoleColor.DarkRed;
+                GameConsoleUI.ForegroundColor = ConsoleColor.DarkRed;
             else if (value <= 1024)
-                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                GameConsoleUI.ForegroundColor = ConsoleColor.DarkMagenta;
             else
-                Console.ForegroundColor = ConsoleColor.DarkBlue;
+                GameConsoleUI.ForegroundColor = ConsoleColor.DarkBlue;
         }
         private void DebugPrintBoard()
         {
@@ -330,8 +332,7 @@ namespace _2048Game
         }
         private void ClearConsoleBuffer(int top)
         {
-            Console.SetCursorPosition(0, top);
-            Console.Write(new String(' ', Console.BufferWidth));
+            GameConsoleUI.ClearConsoleLineBuffer(top);
         }
 
         private int[] board;
@@ -347,8 +348,8 @@ namespace _2048Game
                                                                  (1,3), (8,3), (15,3), (22,3),
                                                                  (1,5), (8,5), (15,5), (22,5),
                                                                  (1,7), (8,7), (15,7), (22,7) };
-        private readonly (int left, int top) COMMUNICATION_LINE = (0, 10);
-        private readonly (int left, int top) HIGH_SCORE_LINE = (0, 9);
+        private const int COMMUNICATION_LINE_TOP = 10;
+        private const int HIGH_SCORE_LINE_TOP = 9;
         private const string ENGLISH_DIRECTIONS = "Enter a direction (W, A, S, D): ";
         private const string HIGH_SCORE_MESSAGE = "High Score: ";
         private readonly (char t, char l, char d, char r) QWERTY_DEFAULT_DIRECTION_KEYS = ('W', 'A', 'S', 'D');
