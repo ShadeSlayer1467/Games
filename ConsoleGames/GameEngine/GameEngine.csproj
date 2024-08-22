@@ -202,6 +202,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleEngine.cs" />
+    <Compile Include="Games\Connect4\Board.cs" />
+    <Compile Include="Games\Connect4\Connect4Engine.cs" />
+    <Compile Include="Games\Connect4\Slot.cs" />
     <Compile Include="Games\TikTacToeEngine.cs" />
     <Compile Include="Games\_2048Engine.cs" />
     <Compile Include="Program.cs" />
