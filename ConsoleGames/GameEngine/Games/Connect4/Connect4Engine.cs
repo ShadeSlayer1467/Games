@@ -12,23 +12,23 @@ namespace Connect4
 {
     public class Connect4Engine : ConsoleGame
     {
-        private Board board = null;
+        private Connect4Board board = null;
         private int currentPlayer;
         private int winner;
-        private object lockObject = new object();
+        private readonly object lockObject = new object();
         private Slot lastPlacedSlot;
 
         public Connect4Engine(){}
         public override void InitializeGame()
         {
-            if (board == null) board = new Board(ROWS, COLUMNS);
+            if (board == null) board = new Connect4Board(ROWS, COLUMNS);
             PrintBoard();
             currentPlayer = PLAYER1;
             winner = 0;
         }
         public override void RunGame()
         {
-            do PlayRound(); while (!CheckForWinner());
+            do PlayRound(); while (!board.InARow(lastPlacedSlot, out winner));
             GameOver();
         }
         public override void CleanUp()
@@ -50,13 +50,12 @@ namespace Connect4
         private void PlayRound()
         {
             int column;
-            bool validMove = false;
+            bool validMove;
             // repeat until a valid move is made
             do
             {
                 column = GetPlayerInput();
-                Slot newPiece;
-                validMove = board.TryPlacePiece(column - 1, currentPlayer, out newPiece);
+                validMove = board.TryPlacePiece(column - 1, currentPlayer, out Slot newPiece);
                 if (!validMove)
                 {
                     lock (lockObject)
@@ -133,35 +132,6 @@ namespace Connect4
                 GameConsoleUI.ClearConsole();
                 GameConsoleUI.WriteLine(sb.ToString(), BOARD_PRINT.left, BOARD_PRINT.top);
             }
-        }
-        private bool CheckForWinner()
-        {
-            var diagonals = board.GetPieceDiagonal(lastPlacedSlot);
-
-            return (ContainsWinner(board.Row(lastPlacedSlot.Row))) ? true :
-                (ContainsWinner(board.Column(lastPlacedSlot.Column))) ? true :
-                (ContainsWinner(diagonals.asc)) ? true :
-                (ContainsWinner(diagonals.desc)) ? true : 
-                (board.slots.Where(s => s.Player == Slot.DEFAULT_PLAYER).Count() == 0) ? true : false;
-        }
-        private bool ContainsWinner(Slot[] slots)
-        {
-            if (slots.Length < Board.WIN_CONDITION) return false;
-            int inARow = 1;
-            for (int i = 0; i < slots.Length - 1; i++)
-            {
-                if (!slots[i].IsOpenSlot && slots[i].Player == slots[i + 1].Player)
-                {
-                    inARow++;
-                    if (inARow == Board.WIN_CONDITION)
-                    {
-                        winner = slots[i].Player;
-                        return true;
-                    }
-                } 
-                else inARow = 1;
-            }
-            return false;
         }
         private void ClearConsoleBuffer(int top)
         {

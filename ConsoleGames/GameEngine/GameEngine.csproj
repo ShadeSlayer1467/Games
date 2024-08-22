@@ -202,12 +202,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleEngine.cs" />
-    <Compile Include="Games\2048\_2048Board.cs" />
-    <Compile Include="Games\Connect4\Board.cs" />
     <Compile Include="Games\Connect4\Connect4Engine.cs" />
+    <Compile Include="Games\Connect4\Connect4Board.cs" />
     <Compile Include="Games\Connect4\Slot.cs" />
     <Compile Include="Games\TikTacToeEngine.cs" />
     <Compile Include="Games\2048\_2048Engine.cs" />
+    <Compile Include="Games\2048\_2048Board.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomSingleton.cs" />
