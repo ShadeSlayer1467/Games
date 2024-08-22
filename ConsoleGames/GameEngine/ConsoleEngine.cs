@@ -1,13 +1,11 @@
-﻿using _2048Game;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AbstractGame;
-using TikTacToe;
 using System.Reflection;
 using BasicGameInterface;
+using GamePlatform.Utilities;
 
 namespace GameEngine
 {
@@ -17,7 +15,7 @@ namespace GameEngine
         {
             while (true)
             {
-                Console.Clear();
+                GameConsoleUI.ClearConsole();
                 ConsoleGame game = SelectGame();
                 do
                 {
@@ -29,12 +27,13 @@ namespace GameEngine
         }
         private ConsoleGame SelectGame()
         {
-            Type game = NativeSelectGameMenuType();
+            Func<Type> SelectMenu = NativeSelectGameMenuType;
 #if INCLUDE_NATIVE_GAMES
-                 game = NativeSelectGameMenuType();
+            SelectMenu = NativeSelectGameMenuType;
 #elif ENABLE_REFLECTION
-                 game = ReflectionSelectGameMenuType();
+                 SelectMenu = ReflectionSelectGameMenuType;
 #endif
+            Type game = SelectMenu();
 
             return (ConsoleGame)Activator.CreateInstance(game);
         }
@@ -50,8 +49,8 @@ namespace GameEngine
                                    .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name)));
             if (types.Count == 0)
             {
-                Console.WriteLine("No games found. Press any key to exit.");
-                Console.ReadKey();
+                GameConsoleUI.WriteLine("No games found. Press any key to exit.");
+                GameConsoleUI.ReadKey();
                 Environment.Exit(0);
             }
             for (int i = 0; i < types.Count; i++)
@@ -59,12 +58,12 @@ namespace GameEngine
                 SelectGameMenuBuilder.AppendLine($"{(char)('a' + i)}. {types[i].Name} ");
             }
             SelectGameMenuBuilder.AppendLine(EXIT_MENU_OPTION_KEY + ". " + EXIT_MENU_OPTION);
-            Console.SetCursorPosition(SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-            Console.WriteLine(SelectGameMenuBuilder.ToString());
-            Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
+
+            GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
+            GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             while (true)
             {
-                response = Console.ReadKey(true).KeyChar;
+                response = GameConsoleUI.ReadKey(true).KeyChar;
                 if (response == EXIT_MENU_OPTION_KEY[0])
                 {
                     Environment.Exit(0);
@@ -74,10 +73,10 @@ namespace GameEngine
                     break;
                 }
                 // invalid input
-                Console.SetCursorPosition(SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-                Console.WriteLine(SelectGameMenuBuilder.ToString());
-                Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
+                GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
+                GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             }
+            Console.Title = types[response - 'a'].Name;
             return types[response - 'a'].type;
         }
         private Type NativeSelectGameMenuType()
@@ -90,8 +89,8 @@ namespace GameEngine
                                                                                               .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name)));
             if (types.Count == 0)
             {
-                Console.WriteLine("No games found. Press any key to exit.");
-                Console.ReadKey();
+                GameConsoleUI.WriteLine("No games found. Press any key to exit.");
+                GameConsoleUI.ReadKey();
                 Environment.Exit(0);
             }
             for (int i = 0; i < types.Count; i++)
@@ -99,12 +98,12 @@ namespace GameEngine
                 SelectGameMenuBuilder.AppendLine($"{(char)('a' + i)}. {types[i].Name} ");
             }
             SelectGameMenuBuilder.AppendLine(EXIT_MENU_OPTION_KEY + ". " + EXIT_MENU_OPTION);
-            Console.SetCursorPosition(SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-            Console.WriteLine(SelectGameMenuBuilder.ToString());
-            Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
+
+            GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
+            GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             while (true)
             {
-                response = Console.ReadKey(true).KeyChar;
+                response = GameConsoleUI.ReadKey(true).KeyChar;
                 if (response == EXIT_MENU_OPTION_KEY[0])
                 {
                     Environment.Exit(0);
@@ -114,27 +113,23 @@ namespace GameEngine
                     break;
                 }
                 // invalid input
-                Console.SetCursorPosition(SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-                Console.WriteLine(SelectGameMenuBuilder.ToString());
-                Console.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
+                GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
+                GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             }
             return types[response - 'a'].type;
         }
         private bool PlayAgainPrompt()
         {
-            while (Console.KeyAvailable) Console.ReadKey(true);
-            Console.Write(PLAY_AGAIN_PROMPT);
-            char inputResponse = Console.ReadKey(true).KeyChar;
-            bool response = false;
-
-            response = (inputResponse.ToString().ToLower() == PLAY_AGAIN_YES);
-            ClearConsoleBuffer(Console.CursorTop);
+            GameConsoleUI.FlushKeyBuffer();
+            GameConsoleUI.Write(PLAY_AGAIN_PROMPT);
+            char inputResponse = GameConsoleUI.ReadKey(true).KeyChar;
+            bool response = inputResponse.ToString().ToLower() == PLAY_AGAIN_YES;
+            ClearConsoleBuffer(GameConsoleUI.CursorTop);
             return response;
         }
         private void ClearConsoleBuffer(int top)
         {
-            Console.SetCursorPosition(0, top);
-            Console.Write(new String(' ', Console.BufferWidth));
+            GameConsoleUI.ClearConsoleLineBuffer(top);
         }
         private List<(Type type, string Name)> GetDLLTypes()
         {
