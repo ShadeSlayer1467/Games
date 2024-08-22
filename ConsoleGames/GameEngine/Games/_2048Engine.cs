@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AbstractGame;
 using BasicGameInterface;
+using GameEngine;
 
 namespace _2048Game
 {
@@ -337,7 +338,7 @@ namespace _2048Game
 
         private int[] board;
         private int HighScore = 0;
-        private Random Random = RandomSingleton.Instance;
+        private readonly Random Random = RandomSingleton.Instance;
 
 
 

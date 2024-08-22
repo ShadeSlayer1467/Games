@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Connect4
 {
-    internal class Board
+    internal class Connect4Board
     {
-        public Slot[] slots;
-        public int COLUMNS { get; private set; }
-        public int ROWS { get; private set; }
-        public Slot this[int row, int col] => GetSlot(row, col);
-        public Board(int Rows = 6, int Columns = 7)
+        internal Slot[] slots;
+        internal int COLUMNS { get; private set; }
+        internal int ROWS { get; private set; }
+        internal Slot this[int row, int col] => GetSlot(row, col);
+        internal Connect4Board(int Rows = 6, int Columns = 7)
         {
             if (Columns <= 0 || Rows <= 0)
             {
@@ -26,13 +27,15 @@ namespace Connect4
             slots = new Slot[COLUMNS * ROWS];
             for (int i = 0; i < Columns * Rows; i++)
             {
-                slots[i] = new Slot();
-                slots[i].Row = i / COLUMNS;
-                slots[i].Column = i % ROWS;
-                slots[i].Player = Slot.DEFAULT_PLAYER;
+                slots[i] = new Slot
+                {
+                    Row = i / COLUMNS,
+                    Column = i % ROWS,
+                    Player = Slot.DEFAULT_PLAYER
+                };
             }
         }
-        public Slot GetSlot(int row, int col)
+        internal Slot GetSlot(int row, int col)
         {
             if (row >= 0 && row < ROWS &&
                 col >= 0 && col < COLUMNS)
@@ -40,9 +43,9 @@ namespace Connect4
             else
                 return Slot.INVALID_SLOT;
         }
-        public Slot[] Row(int row) => Enumerable.Range(0, COLUMNS).Select(col => this[row, col]).ToArray();
-        public Slot[] Column(int col) => Enumerable.Range(0, ROWS).Select(row => this[row, col]).ToArray();
-        public (Slot[] asc, Slot[] desc) GetPieceDiagonal(Slot slot)
+        internal Slot[] Row(int row) => Enumerable.Range(0, COLUMNS).Select(col => this[row, col]).ToArray();
+        internal Slot[] Column(int col) => Enumerable.Range(0, ROWS).Select(row => this[row, col]).ToArray();
+        internal (Slot[] asc, Slot[] desc) GetPieceDiagonal(Slot slot)
         {
             int row = slot.Row;
             int col = slot.Column;
@@ -60,7 +63,7 @@ namespace Connect4
             return (ascending.ToArray(), descending.ToArray());
         }
 
-        public List<Slot[]> Diagonals()
+        internal List<Slot[]> Diagonals()
         {
             List<Slot[]> diagonals = new List<Slot[]>();
 
@@ -129,6 +132,39 @@ namespace Connect4
             piece = bottom;
             return true;
         }
+        internal bool InARow(Slot lastPlacedSlot, out int winner)
+        {
+            winner = Slot.DEFAULT_PLAYER;
+            var (asc, desc) = GetPieceDiagonal(lastPlacedSlot);
+
+            return ContainsWinner(Row(lastPlacedSlot.Row), out winner) || 
+                ContainsWinner(Column(lastPlacedSlot.Column), out winner) || 
+                ContainsWinner(asc, out winner) || 
+                ContainsWinner(desc, out winner) || 
+                (slots.Where(s => s.Player == Slot.DEFAULT_PLAYER).Count() == 0);
+        }
+        private bool ContainsWinner(Slot[] slots, out int winner)
+        {
+            winner = Slot.DEFAULT_PLAYER;
+            if (slots.Length < Connect4Board.WIN_CONDITION) return false;
+            int inARow = 1;
+            for (int i = 0; i < slots.Length - 1; i++)
+            {
+                if (!slots[i].IsOpenSlot && slots[i].Player == slots[i + 1].Player)
+                {
+                    inARow++;
+                    if (inARow == Connect4Board.WIN_CONDITION)
+                    {
+                        winner = slots[i].Player;
+                        return true;
+                    }
+                }
+                else inARow = 1;
+            }
+            return false;
+        }
+
+
         internal const int DEFAULT_PLAYER = Slot.DEFAULT_PLAYER;
 
         internal const int WIN_CONDITION = 4;

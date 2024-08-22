@@ -202,7 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleEngine.cs" />
-    <Compile Include="Games\Connect4\Board.cs" />
+    <Compile Include="Games\Connect4\Connect4Board.cs" />
     <Compile Include="Games\Connect4\Connect4Engine.cs" />
     <Compile Include="Games\Connect4\Slot.cs" />
     <Compile Include="Games\TikTacToeEngine.cs" />
