@@ -1,15 +1,12 @@
 ﻿using AbstractGame;
+using BasicGameInterface;
 using GamePlatform.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Connect4
 {
+    [GameName("Connect 4")]
     public class Connect4Engine : ConsoleGame
     {
         private Connect4Board board = null;
@@ -132,10 +129,6 @@ namespace Connect4
                 GameConsoleUI.ClearConsole();
                 GameConsoleUI.WriteLine(sb.ToString(), BOARD_PRINT.left, BOARD_PRINT.top);
             }
-        }
-        private void ClearConsoleBuffer(int top)
-        {
-            GameConsoleUI.ClearConsoleLineBuffer(top);
         }
 
 

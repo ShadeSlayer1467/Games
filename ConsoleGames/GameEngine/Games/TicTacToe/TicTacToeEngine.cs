@@ -1,34 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using AbstractGame;
 using BasicGameInterface;
 using GamePlatform.Utilities;
 
-namespace TikTacToe
+namespace TicTacToe
 {
     [GameName("Tic Tac Toe")]
-    public class TikTacToeEngine : ConsoleGame
+    public class TicTacToeEngine : ConsoleGame
     {
-        public string Player1 { get; set; }
-        public string Player2 { get; set; }
-        public bool Player1Turn { get; set; }
-        public char[] Board { get; set; }
-        public object _Cursorlock = new object();
-        public (int l, int t) CurrentCursorPosition => (GameConsoleUI.GetConsoleCursorPosition());
-        public (int l, int t) BoardCursorPosition;
+        private string Player1;
+        private string Player2;
+        private char winner;
+        private bool Player1Turn;
+        private readonly TicTacToeBoard boardModel;
+        private readonly object _Cursorlock = new object();
+        private (int l, int t) BoardCursorPosition;
 
+        public TicTacToeEngine()
+        {
+            boardModel = new TicTacToeBoard();
+        }
 
         public override void InitializeGame()
         {
             GameConsoleUI.CursorVisible = false;
             GameConsoleUI.ClearConsole();
-            GameConsoleUI.Title = "Tik Tac Toe";
-            Board = new char[9] { ',', ',', ',', ',', ',', ',', ',', ',', ',' };
+            GameConsoleUI.Title = "Tic Tac Toe";
+            boardModel.Init();
             Player1 = PLAYER1_NAME;
             Player2 = PLAYER2_NAME;
             Player1Turn = true;
@@ -40,50 +42,33 @@ namespace TikTacToe
 
         public override void RunGame()
         {
-            char winner;
-            do
-            {
-                PlayRound();
-                PrintValues();
-                winner = IsGameOver();
-            } while (winner == 'f');
-            GameOver(winner);
+            do PlayRound(); while (IsGameOver());
+            GameOver();
         }
 
-        private void GameOver(char winner)
+        private void GameOver()
         {
+            string winMessage = (winner == 't') ? (DRAW_MESSAGE + SPACE_TO_CONTINUE) : 
+                     (winner == PLAYER1_SYMBOL) ? (PLAYER1_WINS + SPACE_TO_CONTINUE) : 
+                                                  (PLAYER2_WINS + SPACE_TO_CONTINUE);
             lock (_Cursorlock)
             {
                 GameConsoleUI.ClearConsoleLineBuffer(COMMUNICATION_LINE_TOP);
-                if (winner == 't') 
-                    GameConsoleUI.WriteLine(DRAW_MESSAGE + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
-                else if (winner == PLAYER1_SYMBOL) 
-                    GameConsoleUI.WriteLine(PLAYER1_WINS + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
-                else 
-                    GameConsoleUI.WriteLine(PLAYER2_WINS + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
-                
+                GameConsoleUI.WriteLine(winMessage, COMMUNICATION_LINE_TOP);                
             }
 
             while (GameConsoleUI.ReadKeyChar(true) != ' ') ;
 
         }
-        private char IsGameOver()
+        private bool IsGameOver()
         {
-            if (Board.Contains(',') == false) return 't';
-            for (int i = 0; i < 3; i++)
-            {
-                if (Board[i] == Board[i + 3] && Board[i] == Board[i + 6] && Board[i] != ',') return Board[i];
-                if (Board[i * 3] == Board[i * 3 + 1] && Board[i * 3] == Board[i * 3 + 2] && Board[i * 3] != ',') return Board[i];
-            }
-            if (Board[0] == Board[4] && Board[0] == Board[8] && Board[0] != ',') return Board[0];
-            if (Board[2] == Board[4] && Board[2] == Board[6] && Board[2] != ',') return Board[2];
-            return 'f';
+            return boardModel.IsGameOver(out winner);
         }
         public override void CleanUp()
         {
+            GameConsoleUI.CursorVisible = true;
             lock (_Cursorlock)
             {
-                GameConsoleUI.CursorVisible = true;
                 GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP + 1);
                 GameConsoleUI.FlushKeyBuffer();
             }
@@ -116,14 +101,15 @@ namespace TikTacToe
             int index = BOARD_CURSOR_LOCATIONS.IndexOf(BoardCursorPosition);
             if (Player1Turn)
             {
-                Board[index] = PLAYER1_SYMBOL;
+                boardModel[index] = PLAYER1_SYMBOL;
                 Player1Turn = false;
             }
             else
             {
-                Board[index] = PLAYER2_SYMBOL;
+                boardModel[index] = PLAYER2_SYMBOL;
                 Player1Turn = true;
             }
+            PrintValues();
         }
         private char GetMoveDirection()
         {
@@ -232,7 +218,7 @@ namespace TikTacToe
             int index = BOARD_CURSOR_LOCATIONS.IndexOf(cursorPosition);
 
             if (index < 0) return null;
-            return Board[index];
+            return boardModel[index];
         }
         private void PrintBoard()
         {
@@ -259,13 +245,9 @@ namespace TikTacToe
                 lock (_Cursorlock)
                 {
                     GameConsoleUI.SetCursorPosition(cursor.l, cursor.t);
-                    GameConsoleUI.Write(@"{0,2}", Board[BOARD_CURSOR_LOCATIONS.IndexOf(cursor)]);
+                    GameConsoleUI.Write(@"{0,2}", boardModel[BOARD_CURSOR_LOCATIONS.IndexOf(cursor)]);
                 }
             }
-        }
-        private void ClearConsoleBuffer(int top)
-        {
-            GameConsoleUI.ClearConsoleLineBuffer(top);
         }
 
         private readonly (int l, int t) BOARD_POSITION = (0, 0);
