@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AbstractGame;
 using BasicGameInterface;
+using GamePlatform.Utilities;
 
 namespace TikTacToe
 {
@@ -18,15 +19,15 @@ namespace TikTacToe
         public bool Player1Turn { get; set; }
         public char[] Board { get; set; }
         public object _Cursorlock = new object();
-        public (int l, int t) CurrentCursorPosition => (Console.CursorLeft, Console.CursorTop);
+        public (int l, int t) CurrentCursorPosition => (GameConsoleUI.GetConsoleCursorPosition());
         public (int l, int t) BoardCursorPosition;
 
 
         public override void InitializeGame()
         {
-            Console.CursorVisible = false;
-            Console.Clear();
-            Console.Title = "Tik Tac Toe";
+            GameConsoleUI.CursorVisible = false;
+            GameConsoleUI.ClearConsole();
+            GameConsoleUI.Title = "Tik Tac Toe";
             Board = new char[9] { ',', ',', ',', ',', ',', ',', ',', ',', ',' };
             Player1 = PLAYER1_NAME;
             Player2 = PLAYER2_NAME;
@@ -39,7 +40,7 @@ namespace TikTacToe
 
         public override void RunGame()
         {
-            char winner = 'f';
+            char winner;
             do
             {
                 PlayRound();
@@ -51,34 +52,19 @@ namespace TikTacToe
 
         private void GameOver(char winner)
         {
-            if (winner == 't')
+            lock (_Cursorlock)
             {
-                lock (_Cursorlock)
-                {
-                    ClearConsoleBuffer(COMMUNICATION_LINE.t);
-                    Console.SetCursorPosition(COMMUNICATION_LINE.l, COMMUNICATION_LINE.t);
-                    Console.WriteLine(DRAW_MESSAGE + SPACE_TO_CONTINUE);
-                }
+                GameConsoleUI.ClearConsoleLineBuffer(COMMUNICATION_LINE_TOP);
+                if (winner == 't') 
+                    GameConsoleUI.WriteLine(DRAW_MESSAGE + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
+                else if (winner == PLAYER1_SYMBOL) 
+                    GameConsoleUI.WriteLine(PLAYER1_WINS + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
+                else 
+                    GameConsoleUI.WriteLine(PLAYER2_WINS + SPACE_TO_CONTINUE, COMMUNICATION_LINE_TOP);
+                
             }
-            else if (winner == PLAYER1_SYMBOL)
-            {
-                lock (_Cursorlock)
-                {
-                    ClearConsoleBuffer(COMMUNICATION_LINE.t);
-                    Console.SetCursorPosition(COMMUNICATION_LINE.l, COMMUNICATION_LINE.t);
-                    Console.WriteLine(PLAYER1_WINS + SPACE_TO_CONTINUE);
-                }
-            }
-            else
-                {
-                lock (_Cursorlock)
-                {
-                    ClearConsoleBuffer(COMMUNICATION_LINE.t);
-                    Console.SetCursorPosition(COMMUNICATION_LINE.l, COMMUNICATION_LINE.t);
-                    Console.WriteLine(PLAYER2_WINS + SPACE_TO_CONTINUE);
-                }
-            }
-            while (Console.ReadKey(true).KeyChar != ' ') ;
+
+            while (GameConsoleUI.ReadKeyChar(true) != ' ') ;
 
         }
         private char IsGameOver()
@@ -97,9 +83,9 @@ namespace TikTacToe
         {
             lock (_Cursorlock)
             {
-                Console.CursorVisible = true;
-                Console.SetCursorPosition(0, COMMUNICATION_LINE.t + 1);
-                while (Console.KeyAvailable) Console.ReadKey(true);
+                GameConsoleUI.CursorVisible = true;
+                GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP + 1);
+                GameConsoleUI.FlushKeyBuffer();
             }
         }
         private void PlayRound()
@@ -141,16 +127,14 @@ namespace TikTacToe
         }
         private char GetMoveDirection()
         {
-            char direction = ' ';
-
             lock (_Cursorlock)
             {
-                Console.SetCursorPosition(COMMUNICATION_LINE.l, COMMUNICATION_LINE.t);
-                Console.Write(ENGLISH_DIRECTIONS);
+                GameConsoleUI.Write(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
             }
+            char direction;
             while (true)
             {
-                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+                ConsoleKeyInfo keyInfo = GameConsoleUI.ReadKey(true);
 
                 if (keyInfo.Key == ConsoleKey.Enter)
                 {
@@ -229,14 +213,14 @@ namespace TikTacToe
             {
                 lock (_Cursorlock)
                 {
-                    Console.SetCursorPosition(cursorPos.l, cursorPos.t);
-                    Console.Write(@"{0,2}", FAKE_CURSOR);
+                    GameConsoleUI.SetCursorPosition(cursorPos.l, cursorPos.t);
+                    GameConsoleUI.Write(@"{0,2}", FAKE_CURSOR);
                 }
                 Thread.Sleep(100);
                 lock (_Cursorlock)
                 {
-                    Console.SetCursorPosition(cursorPos.l, cursorPos.t);
-                    Console.Write(@"{0,2}", boardChar);
+                    GameConsoleUI.SetCursorPosition(cursorPos.l, cursorPos.t);
+                    GameConsoleUI.Write(@"{0,2}", boardChar);
                 }
                 Thread.Sleep(100);
             }
@@ -252,18 +236,20 @@ namespace TikTacToe
         }
         private void PrintBoard()
         {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("╔═══╦═══╦═══╗");
+            sb.AppendLine("║   ║   ║   ║");
+            sb.AppendLine("╠═══╬═══╬═══╣");
+            sb.AppendLine("║   ║   ║   ║");
+            sb.AppendLine("╠═══╬═══╬═══╣");
+            sb.AppendLine("║   ║   ║   ║");
+            sb.AppendLine("╚═══╩═══╩═══╝");
+
+            
             lock (_Cursorlock)
             {
-                Console.SetCursorPosition(BOARD_POSITION.l, BOARD_POSITION.t);
-                Console.WriteLine("╔═══╦═══╦═══╗");
-                Console.WriteLine("║   ║   ║   ║");
-                Console.WriteLine("╠═══╬═══╬═══╣");
-                Console.WriteLine("║   ║   ║   ║");
-                Console.WriteLine("╠═══╬═══╬═══╣");
-                Console.WriteLine("║   ║   ║   ║");
-                Console.WriteLine("╚═══╩═══╩═══╝");
-                Console.SetCursorPosition(0, COMMUNICATION_LINE.t);
-                Console.Write(ENGLISH_DIRECTIONS);
+                GameConsoleUI.WriteLine(sb.ToString(), BOARD_POSITION.t);
+                GameConsoleUI.Write(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
             }
         }
         private void PrintValues()
@@ -272,15 +258,14 @@ namespace TikTacToe
             {
                 lock (_Cursorlock)
                 {
-                    Console.SetCursorPosition(cursor.l, cursor.t);
-                    Console.Write(@"{0,2}", Board[BOARD_CURSOR_LOCATIONS.IndexOf(cursor)]);
+                    GameConsoleUI.SetCursorPosition(cursor.l, cursor.t);
+                    GameConsoleUI.Write(@"{0,2}", Board[BOARD_CURSOR_LOCATIONS.IndexOf(cursor)]);
                 }
             }
         }
         private void ClearConsoleBuffer(int top)
         {
-            Console.SetCursorPosition(0, top);
-            Console.Write(new String(' ', Console.BufferWidth));
+            GameConsoleUI.ClearConsoleLineBuffer(top);
         }
 
         private readonly (int l, int t) BOARD_POSITION = (0, 0);
@@ -294,7 +279,7 @@ namespace TikTacToe
 
         private readonly (char t, char l, char d, char r) QWERTY_DEFAULT_DIRECTION_KEYS = ('W', 'A', 'S', 'D');
         private readonly char ENTER_KEY = '\r';
-        private readonly (int l, int t) COMMUNICATION_LINE = (0, 7);
+        private const int COMMUNICATION_LINE_TOP = 7;
 
 
         private const char PLAYER1_SYMBOL = 'X';
