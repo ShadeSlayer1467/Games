@@ -84,6 +84,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Matthew Read - [shadeslayer1467@gmail.com](mailto:shadeslayer1467@gmail.com)
+[shadeslayer1467@gmail.com](mailto:shadeslayer1467@gmail.com)
 
 Project Link: [https://github.com/ShadeSlayer1467/Games](https://github.com/ShadeSlayer1467/Games)

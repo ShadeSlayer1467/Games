@@ -1,10 +1,15 @@
+2048
+Tic Tac Toe
 connect 4
+-- refactor winner check to be based on most recent piece
+
 snake
 
 Base Engine:
--Reflection
+-Reflection off?
 --Naming Conventions
 --Game Select menu can only go up to 26 (a-z)
+--Separate Outputing to specific class?
 --refactor player input (GetInput(...,char[] acceptable inputs)
 
 Release:
