@@ -1,4 +1,5 @@
 ﻿using AbstractGame;
+using GamePlatform.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,19 +34,18 @@ namespace Connect4
         public override void CleanUp()
         {
             board = null;
-            Console.SetCursorPosition(0, COMMUNICATION_LINE.top + 1);
-            while (Console.KeyAvailable) Console.ReadKey(true);
+            GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP + 1);
+            GameConsoleUI.FlushKeyBuffer();
         }
         private void GameOver()
         {
             lock (lockObject)
             {
-                ClearConsoleBuffer(COMMUNICATION_LINE.top);
-                Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
-                Console.WriteLine((winner == PLAYER1) ? PLAYER1_WIN : 
-                                  (winner == PLAYER2) ? PLAYER2_WIN : TIE);
-            }
-            while (Console.ReadKey(true).KeyChar != ' ');
+                GameConsoleUI.ClearConsoleLineBuffer(COMMUNICATION_LINE_TOP);
+                GameConsoleUI.WriteLine((winner == PLAYER1) ? PLAYER1_WIN : 
+                                                              (winner == PLAYER2) ? PLAYER2_WIN : TIE, COMMUNICATION_LINE_TOP);
+            }            
+            while (GameConsoleUI.ReadKeyChar(true) != ' ');
         }
         private void PlayRound()
         {
@@ -60,9 +60,8 @@ namespace Connect4
                 {
                     lock (lockObject)
                     {
-                        ClearConsoleBuffer(COMMUNICATION_LINE.top);
-                        Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
-                        Console.WriteLine(INVALID_MOVE + INSTRTUCTIONS);
+                        GameConsoleUI.ClearConsoleLineBuffer(COMMUNICATION_LINE_TOP);
+                        GameConsoleUI.WriteLine(INVALID_MOVE + INSTRTUCTIONS, COMMUNICATION_LINE_TOP);
                     }
                 }
                 else
@@ -79,7 +78,7 @@ namespace Connect4
             int columnInt;
             while (true)
             {
-                char columnChar = Console.ReadKey(true).KeyChar;
+                char columnChar = GameConsoleUI.ReadKeyChar(true);
                 Int32.TryParse(columnChar.ToString(), out columnInt);
                 if (1 <= columnInt && columnInt <= board.COLUMNS) break;
                 else
@@ -87,8 +86,7 @@ namespace Connect4
 
                     lock (lockObject)
                     {
-                        Console.SetCursorPosition(COMMUNICATION_LINE.left, COMMUNICATION_LINE.top);
-                        Console.WriteLine(INVALID_MOVE + INSTRTUCTIONS);
+                        GameConsoleUI.WriteLine(INVALID_MOVE + INSTRTUCTIONS, COMMUNICATION_LINE_TOP);   
                     }
                 }
             }
@@ -131,21 +129,19 @@ namespace Connect4
 
             lock (lockObject)
             {
-                Console.Clear();
-                Console.SetCursorPosition(BOARD_PRINT.left, BOARD_PRINT.top);
-                Console.WriteLine(sb.ToString());
+                GameConsoleUI.ClearConsole();
+                GameConsoleUI.WriteLine(sb.ToString(), BOARD_PRINT.left, BOARD_PRINT.top);
             }
         }
         private void ClearConsoleBuffer(int top)
         {
-            Console.SetCursorPosition(0, top);
-            Console.Write(new String(' ', Console.BufferWidth));
+            GameConsoleUI.ClearConsoleLineBuffer(top);
         }
 
 
 
         private readonly (int left, int top) BOARD_PRINT = (0, 0);
-        private readonly (int left, int top) COMMUNICATION_LINE = (0, 14);
+        private const int COMMUNICATION_LINE_TOP = (14);
 
         private const int COLUMNS = 7;
         private const int ROWS = 6;
