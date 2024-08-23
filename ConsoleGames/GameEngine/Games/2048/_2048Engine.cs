@@ -56,7 +56,8 @@ namespace _2048Game
         {
             char direction;
 
-            GameConsoleUI.WriteLine(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
+            GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP);
+            GameConsoleUI.Write(ENGLISH_DIRECTIONS);
             while (true)
             {
                 direction = GameConsoleUI.ReadKeyChar(false);
