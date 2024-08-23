@@ -42,7 +42,7 @@ namespace TicTacToe
 
         public override void RunGame()
         {
-            do PlayRound(); while (IsGameOver());
+            do PlayRound(); while (!IsGameOver());
             GameOver();
         }
 
@@ -115,7 +115,8 @@ namespace TicTacToe
         {
             lock (_Cursorlock)
             {
-                GameConsoleUI.Write(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
+                GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP);
+                GameConsoleUI.Write(ENGLISH_DIRECTIONS);
             }
             char direction;
             while (true)
@@ -235,7 +236,8 @@ namespace TicTacToe
             lock (_Cursorlock)
             {
                 GameConsoleUI.WriteLine(sb.ToString(), BOARD_POSITION.t);
-                GameConsoleUI.Write(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
+                GameConsoleUI.SetConsoleCursorLine(COMMUNICATION_LINE_TOP);
+                GameConsoleUI.Write(ENGLISH_DIRECTIONS);
             }
         }
         private void PrintValues()

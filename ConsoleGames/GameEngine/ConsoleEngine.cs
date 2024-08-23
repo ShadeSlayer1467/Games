@@ -76,7 +76,7 @@ namespace GameEngine
                 GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
                 GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             }
-            Console.Title = types[response - 'a'].Name;
+            GameConsoleUI.Title = types[response - 'a'].Name;
             return types[response - 'a'].type;
         }
         private Type NativeSelectGameMenuType()
@@ -116,6 +116,7 @@ namespace GameEngine
                 GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
                 GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
             }
+            GameConsoleUI.Title = types[response - 'a'].Name;
             return types[response - 'a'].type;
         }
         private bool PlayAgainPrompt()
