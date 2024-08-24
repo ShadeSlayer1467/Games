@@ -19,11 +19,27 @@ namespace GamePlatform.Utilities
             get { return Console.Title; }
             set { Console.Title = value; }
         }
+        public static bool KeyAvailable
+        {
+            get { return Console.KeyAvailable; }
+            internal set { }
+        }
 
         public static int CursorTop
         {
             get { return Console.CursorTop;  }
             set { Console.CursorTop = value;  }
+        }
+
+        public static float WindowWidth 
+        {
+            get { return Console.WindowWidth; }
+            internal set { }
+        }
+        public static float WindowHeight
+        {
+            get { return Console.WindowHeight; }
+            internal set { }
         }
 
         public static void ClearConsole()
@@ -88,6 +104,8 @@ namespace GamePlatform.Utilities
 
         public static void SetCursorPosition(int left, int top)
         {
+            var w = Console.BufferWidth;
+            var h = Console.BufferHeight;
             Console.SetCursorPosition(left, top);
         }
         public static void SetConsoleCursorLine(int top)

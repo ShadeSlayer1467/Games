@@ -205,6 +205,8 @@
     <Compile Include="Games\Connect4\Connect4Engine.cs" />
     <Compile Include="Games\Connect4\Connect4Board.cs" />
     <Compile Include="Games\Connect4\Slot.cs" />
+    <Compile Include="Games\Snake\SnakeEngine.cs" />
+    <Compile Include="Games\Snake\SnakeGameModel.cs" />
     <Compile Include="Games\TicTacToe\TicTacToeBoard.cs" />
     <Compile Include="Games\TicTacToe\TicTacToeEngine.cs" />
     <Compile Include="Games\2048\_2048Engine.cs" />
@@ -224,6 +226,7 @@
       <Name>AbstractGame</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.5.5\build\Fody.targets" Condition="Exists('..\packages\Fody.6.5.5\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
