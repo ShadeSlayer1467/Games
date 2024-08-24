@@ -206,6 +206,7 @@
     <Compile Include="Games\Connect4\Connect4Board.cs" />
     <Compile Include="Games\Connect4\Slot.cs" />
     <Compile Include="Games\Snake\SnakeEngine.cs" />
+    <Compile Include="Games\Snake\SnakeGameModel.cs" />
     <Compile Include="Games\TicTacToe\TicTacToeBoard.cs" />
     <Compile Include="Games\TicTacToe\TicTacToeEngine.cs" />
     <Compile Include="Games\2048\_2048Engine.cs" />
