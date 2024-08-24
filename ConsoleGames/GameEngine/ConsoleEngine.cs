@@ -35,6 +35,8 @@ namespace GameEngine
         {
             char response = ' ';
             StringBuilder SelectGameMenuBuilder = new StringBuilder(SELECT_GAME_MENU).AppendLine();
+
+            // Get all types that are subclasses of ConsoleGame
             List<(Type type, string Name)> types = new List<(Type type, string Name)>();
 
             #if ENABLE_REFLECTION
@@ -44,6 +46,8 @@ namespace GameEngine
                                     .GetTypes()
                                     .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
                                     .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name)));
+
+            // Create the menu
             if (types.Count == 0)
             {
                 GameConsoleUI.WriteLine("No games found. Press any key to exit.");
@@ -58,6 +62,8 @@ namespace GameEngine
 
             GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
             GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
+
+            // Get user input
             while (true)
             {
                 response = GameConsoleUI.ReadKey(true).KeyChar;
