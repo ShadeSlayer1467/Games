@@ -27,66 +27,23 @@ namespace GameEngine
         }
         private ConsoleGame SelectGame()
         {
-            Func<Type> SelectMenu = NativeSelectGameMenuType;
-#if INCLUDE_NATIVE_GAMES
-            SelectMenu = NativeSelectGameMenuType;
-#elif ENABLE_REFLECTION
-                 SelectMenu = ReflectionSelectGameMenuType;
-#endif
-            Type game = SelectMenu();
+            Type game = SelectGameMenuType();
 
             return (ConsoleGame)Activator.CreateInstance(game);
         }
-        private Type ReflectionSelectGameMenuType()
+        private Type SelectGameMenuType()
         {
             char response = ' ';
             StringBuilder SelectGameMenuBuilder = new StringBuilder(SELECT_GAME_MENU).AppendLine();
-            List<(Type type, string Name)> types = GetDLLTypes();
+            List<(Type type, string Name)> types = new List<(Type type, string Name)>();
 
+            #if ENABLE_REFLECTION
+                        types = GetDLLTypes();
+            #endif
             types.AddRange(Assembly.GetExecutingAssembly()
-                                   .GetTypes()
-                                   .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
-                                   .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name)));
-            if (types.Count == 0)
-            {
-                GameConsoleUI.WriteLine("No games found. Press any key to exit.");
-                GameConsoleUI.ReadKey();
-                Environment.Exit(0);
-            }
-            for (int i = 0; i < types.Count; i++)
-            {
-                SelectGameMenuBuilder.AppendLine($"{(char)('a' + i)}. {types[i].Name} ");
-            }
-            SelectGameMenuBuilder.AppendLine(EXIT_MENU_OPTION_KEY + ". " + EXIT_MENU_OPTION);
-
-            GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-            GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
-            while (true)
-            {
-                response = GameConsoleUI.ReadKey(true).KeyChar;
-                if (response == EXIT_MENU_OPTION_KEY[0])
-                {
-                    Environment.Exit(0);
-                }
-                if (response >= 'a' && response <= 'z' && response - 'a' < types.Count)
-                {
-                    break;
-                }
-                // invalid input
-                GameConsoleUI.WriteLine(SelectGameMenuBuilder.ToString(), SELECT_GAME_MENU_C.left, SELECT_GAME_MENU_C.top);
-                GameConsoleUI.SetCursorPosition(SELECT_GAME_INPUT.left, SELECT_GAME_INPUT.top);
-            }
-            GameConsoleUI.Title = types[response - 'a'].Name;
-            return types[response - 'a'].type;
-        }
-        private Type NativeSelectGameMenuType()
-        {
-            char response = ' ';
-            StringBuilder SelectGameMenuBuilder = new StringBuilder(SELECT_GAME_MENU).AppendLine();
-            List<(Type type, string Name)> types = new List<(Type type, string Name)>(Assembly.GetExecutingAssembly()
-                                                                                              .GetTypes()
-                                                                                              .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
-                                                                                              .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name)));
+                                    .GetTypes()
+                                    .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
+                                    .Select(typeSelect => (typeSelect, typeSelect.GetCustomAttribute<GameNameAttribute>()?.Name ?? typeSelect.Name)));
             if (types.Count == 0)
             {
                 GameConsoleUI.WriteLine("No games found. Press any key to exit.");
@@ -134,7 +91,11 @@ namespace GameEngine
         }
         private List<(Type type, string Name)> GetDLLTypes()
         {
-            List<Assembly> assemblies = LoadAllDLLAssemblies();
+            List<Assembly> assemblies = new List<Assembly>();
+            foreach (string file in System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.dll"))
+            {
+                assemblies.Add(Assembly.LoadFile(file));
+            }
 
             var gameTypes = assemblies.SelectMany(assembly => assembly.GetTypes())
                           .Where(typeWhere => typeWhere.IsSubclassOf(typeof(ConsoleGame)))
@@ -142,15 +103,6 @@ namespace GameEngine
                           .ToList();
 
             return gameTypes;
-        }
-        private List<Assembly> LoadAllDLLAssemblies()
-        {
-            List<Assembly> assemblies = new List<Assembly>();
-            foreach (string file in System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.dll"))
-            {
-                assemblies.Add(Assembly.LoadFile(file));
-            }
-            return assemblies;
         }
 
         private readonly (int left, int top) SELECT_GAME_MENU_C = (0, 0);
