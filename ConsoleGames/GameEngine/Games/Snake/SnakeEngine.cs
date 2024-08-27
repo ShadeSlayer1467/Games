@@ -21,6 +21,7 @@ namespace GamePlatform.Games.Snake
         Vector2 Border => new Vector2(GameConsoleUI.WindowWidth, GameConsoleUI.WindowHeight);
         bool gameOver = false;
         char lastKeyPressed;
+        int difficulty = FRAME_WAIT;
         int sleepMS = FRAME_WAIT;
 
 
@@ -42,6 +43,7 @@ namespace GamePlatform.Games.Snake
             GameConsoleUI.ClearConsole();
             GameConsoleUI.WriteLine(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
             GameConsoleUI.ReadKeyChar(true);
+            difficulty = GetDifficultyFromPlayer();
             GameConsoleUI.ClearConsole();
             PrintBorder();
 
@@ -50,6 +52,26 @@ namespace GamePlatform.Games.Snake
 
             do UpdateFrame(); while (!gameOver); GameOver();
         }
+
+        private int GetDifficultyFromPlayer()
+        {
+            GameConsoleUI.WriteLine("Choose difficulty: 1 - Easy, 2 - Medium, 3 - Hard, 4 - Impossible");
+            char key = GameConsoleUI.ReadKeyChar(true);
+            switch (key)
+            {
+                case '1':
+                    return 200;
+                case '2':
+                    return 100;
+                case '3':
+                    return 50;
+                case '4':
+                    return 10;
+                default:
+                    return 100;
+            }
+        }
+
         public override void CleanUp()
         {
             GameConsoleUI.ClearConsole();
@@ -141,25 +163,25 @@ namespace GamePlatform.Games.Snake
             {
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.t:
                     snakeModel.Direction = new Vector2(0, -1);
-                    if (snakeModel.Direction.Y == -1) sleepMS = (int)(FRAME_WAIT * VERTICAL_ADJUST);
+                    if (snakeModel.Direction.Y == -1) sleepMS = (int)(difficulty * VERTICAL_ADJUST);
                     break;
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.l:
                     snakeModel.Direction = new Vector2(-1, 0);
-                    if (snakeModel.Direction.X == -1) sleepMS = FRAME_WAIT;
+                    if (snakeModel.Direction.X == -1) sleepMS = difficulty;
                     break;
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.d:
                     snakeModel.Direction = new Vector2(0, 1);
-                    if (snakeModel.Direction.Y == 1) sleepMS = (int)(FRAME_WAIT * VERTICAL_ADJUST);
+                    if (snakeModel.Direction.Y == 1) sleepMS = (int)(difficulty * VERTICAL_ADJUST);
                     break;
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.r:
                     snakeModel.Direction = new Vector2(1, 0);
-                    if (snakeModel.Direction.X == 1) sleepMS = FRAME_WAIT;
+                    if (snakeModel.Direction.X == 1) sleepMS = difficulty;
                     break;
             }
         }
 
         const int COMMUNICATION_LINE_TOP = 0;
-        const int FRAME_WAIT = 10;
+        const int FRAME_WAIT = 300;
         const float VERTICAL_ADJUST = 2.3f;
         const string ENGLISH_DIRECTIONS = "Use WASD to move the snake.... press space to continue";
 
