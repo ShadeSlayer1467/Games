@@ -20,6 +20,7 @@ namespace _2048Game
         }
         public override void InitializeGame()
         {
+            GameConsoleUI.CursorVisible = false;
             GameConsoleUI.ClearConsole();
             boardModel = new _2048Board();
             HighScore = 0;

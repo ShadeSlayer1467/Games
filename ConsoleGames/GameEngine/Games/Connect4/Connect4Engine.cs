@@ -18,6 +18,7 @@ namespace Connect4
         public Connect4Engine(){}
         public override void InitializeGame()
         {
+            GameConsoleUI.CursorVisible = false;
             if (board == null) board = new Connect4Board(ROWS, COLUMNS);
             PrintBoard();
             currentPlayer = PLAYER1;
