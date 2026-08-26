@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using AbstractGame;
 using BasicGameInterface;
 using GameEngine;
@@ -26,8 +25,10 @@ namespace _2048Game
             HighScore = 0;
 
             boardModel.GenerateNewNumbers(rand);
+            boardModel.GenerateNewNumbers(rand);
             PrintBoard();
             PrintValues();
+            UpdateHighScore();
         }
         public override void RunGame()
         {
@@ -48,8 +49,10 @@ namespace _2048Game
         }
         private void PlayRound()
         {
-            MovePieces(GetMoveDirection());
-            boardModel.GenerateNewNumbers(rand);
+            if (MovePieces(GetMoveDirection()))
+            {
+                boardModel.GenerateNewNumbers(rand);
+            }
             PrintValues();
             UpdateHighScore();
         }
@@ -62,33 +65,38 @@ namespace _2048Game
             while (true)
             {
                 direction = GameConsoleUI.ReadKeyChar(false);
-                if (QWERTY_DEFAULT_DIRECTION_KEYS.ToString().ToLower().Contains(direction)) break;
+                if (IsMoveKey(direction)) break;
                 else
                 {
                     (int left, int top) = GameConsoleUI.GetConsoleCursorPosition();
-                    GameConsoleUI.SetCursorPosition(left - 1, top);
+                    GameConsoleUI.SetCursorPosition(Math.Max(0, left - 1), top);
                 }
             }
 
             return direction;
         }
-        private void MovePieces(char direction)
+        private bool IsMoveKey(char direction)
         {
-            switch (char.ToUpper(direction))
+            char normalizedDirection = char.ToUpperInvariant(direction);
+            return normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.t ||
+                   normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.l ||
+                   normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.d ||
+                   normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.r;
+        }
+        private bool MovePieces(char direction)
+        {
+            switch (char.ToUpperInvariant(direction))
             {
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.t:
-                    boardModel.MoveUp();
-                    break;
+                    return boardModel.MoveUp();
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.l:
-                    boardModel.MoveLeft();
-                    break;
+                    return boardModel.MoveLeft();
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.d:
-                    boardModel.MoveDown();
-                    break;
+                    return boardModel.MoveDown();
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.r:
-                    boardModel.MoveRight();
-                    break;
+                    return boardModel.MoveRight();
             }
+            return false;
         }
         private void PrintHighScore()
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Connect4
@@ -24,7 +23,7 @@ namespace Connect4
                 slots[i] = new Slot
                 {
                     Row = i / COLUMNS,
-                    Column = i % ROWS,
+                    Column = i % COLUMNS,
                     Player = Slot.DEFAULT_PLAYER
                 };
             }
@@ -36,74 +35,6 @@ namespace Connect4
                 return slots[row * COLUMNS + col];
             else
                 return Slot.INVALID_SLOT;
-        }
-        internal Slot[] Row(int row) => Enumerable.Range(0, COLUMNS).Select(col => this[row, col]).ToArray();
-        internal Slot[] Column(int col) => Enumerable.Range(0, ROWS).Select(row => this[row, col]).ToArray();
-        internal (Slot[] asc, Slot[] desc) GetPieceDiagonal(Slot slot)
-        {
-            int row = slot.Row;
-            int col = slot.Column;
-            List<Slot> ascending = new List<Slot>();
-            List<Slot> descending = new List<Slot>();
-
-            for (int offset = 0; row + offset < ROWS; offset++)
-            {
-                Slot next = this[row + offset, col + offset];
-                if (next.IsValid()) descending.Add(next);
-
-                next = this[row + offset, col - offset];
-                if (next.IsValid()) ascending.Add(next);
-            }
-            return (ascending.ToArray(), descending.ToArray());
-        }
-
-        internal List<Slot[]> Diagonals()
-        {
-            List<Slot[]> diagonals = new List<Slot[]>();
-
-            // Traverse diagonals starting from each column of the first row
-            for (int column = 0; column < COLUMNS; column++)
-            {
-                List<Slot> descendingDiagonal = new List<Slot>();
-                List<Slot> ascendingDiagonal = new List<Slot>();
-
-                // build descending and ascending diagonals from the current column
-                for (int row = 0, columnOffset = 0; row < ROWS && (column + columnOffset) < COLUMNS && (column - columnOffset) >= 0; row++, columnOffset++)
-                {
-                    if (column + columnOffset < COLUMNS)
-                    {
-                        Slot nextRight = this[row, column + columnOffset];
-                        if (nextRight.IsValid()) descendingDiagonal.Add(nextRight);
-                    }
-
-                    if (column - columnOffset >= 0)
-                    {
-                        Slot nextLeft = this[row, column - columnOffset];
-                        if (nextLeft.IsValid()) ascendingDiagonal.Add(nextLeft);
-                    }
-                }
-
-                if (descendingDiagonal.Count >= WIN_CONDITION) diagonals.Add(descendingDiagonal.ToArray());
-                if (ascendingDiagonal.Count >= WIN_CONDITION) diagonals.Add(ascendingDiagonal.ToArray());
-            }
-
-            // get all diagonals that pass through the first/last column
-            for (int row = 1; row < ROWS; row++)
-            {
-                List<Slot> descendingDiagonal = new List<Slot>();
-                List<Slot> ascendingDiagonal = new List<Slot>();
-
-                for (int colOffset = 0; row + colOffset < ROWS && (COLUMNS - 1 - colOffset) >= 0; colOffset++)
-                {
-                    descendingDiagonal.Add(this[row + colOffset, COLUMNS - 1 - colOffset]);
-                    ascendingDiagonal.Add(this[row + colOffset, colOffset]);
-                }
-
-                if (descendingDiagonal.Count >= WIN_CONDITION) diagonals.Add(descendingDiagonal.ToArray());
-                if (ascendingDiagonal.Count >= WIN_CONDITION) diagonals.Add(ascendingDiagonal.ToArray());
-            }
-
-            return diagonals;
         }
         internal bool TryPlacePiece(int column, int currentPlayer, out Slot piece)
         {
@@ -129,38 +60,47 @@ namespace Connect4
         internal bool InARow(Slot lastPlacedSlot, out int winner)
         {
             winner = Slot.DEFAULT_PLAYER;
-            var (asc, desc) = GetPieceDiagonal(lastPlacedSlot);
-
-            return ContainsWinner(Row(lastPlacedSlot.Row), out winner) || 
-                ContainsWinner(Column(lastPlacedSlot.Column), out winner) || 
-                ContainsWinner(asc, out winner) || 
-                ContainsWinner(desc, out winner) || 
-                (slots.Where(s => s.Player == Slot.DEFAULT_PLAYER).Count() == 0);
-        }
-        private bool ContainsWinner(Slot[] slots, out int winner)
-        {
-            winner = Slot.DEFAULT_PLAYER;
-            if (slots.Length < Connect4Board.WIN_CONDITION) return false;
-            int inARow = 1;
-            for (int i = 0; i < slots.Length - 1; i++)
+            if (lastPlacedSlot == null || !lastPlacedSlot.IsValid() || lastPlacedSlot.IsOpenSlot)
             {
-                if (!slots[i].IsOpenSlot && slots[i].Player == slots[i + 1].Player)
-                {
-                    inARow++;
-                    if (inARow == Connect4Board.WIN_CONDITION)
-                    {
-                        winner = slots[i].Player;
-                        return true;
-                    }
-                }
-                else inARow = 1;
+                return IsFull();
             }
-            return false;
+
+            if (HasConnectedLine(lastPlacedSlot, 0, 1) ||
+                HasConnectedLine(lastPlacedSlot, 1, 0) ||
+                HasConnectedLine(lastPlacedSlot, 1, 1) ||
+                HasConnectedLine(lastPlacedSlot, 1, -1))
+            {
+                winner = lastPlacedSlot.Player;
+                return true;
+            }
+
+            return IsFull();
         }
+        private bool HasConnectedLine(Slot slot, int rowDelta, int columnDelta)
+        {
+            int matchingSlots = CountMatchingSlots(slot, rowDelta, columnDelta) +
+                                CountMatchingSlots(slot, -rowDelta, -columnDelta) - 1;
+            return matchingSlots >= WIN_CONDITION;
+        }
+        private int CountMatchingSlots(Slot slot, int rowDelta, int columnDelta)
+        {
+            int count = 0;
 
+            for (int row = slot.Row, column = slot.Column;
+                 row >= 0 && row < ROWS && column >= 0 && column < COLUMNS;
+                 row += rowDelta, column += columnDelta)
+            {
+                Slot nextSlot = this[row, column];
+                if (!nextSlot.IsValid() || nextSlot.Player != slot.Player) break;
+                count++;
+            }
 
-        internal const int DEFAULT_PLAYER = Slot.DEFAULT_PLAYER;
-
+            return count;
+        }
+        private bool IsFull()
+        {
+            return !slots.Any(s => s.Player == Slot.DEFAULT_PLAYER);
+        }
         internal const int WIN_CONDITION = 4;
     }
 }

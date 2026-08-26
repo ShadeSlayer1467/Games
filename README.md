@@ -24,8 +24,8 @@ This project is a collection of various games implemented in C#. The goal is to 
 
 - **2048**: Slide tiles on a grid to combine them and create a tile with the number 2048.
 - **Tic Tac Toe**: A classic two-player game where the goal is to get three of your marks in a row.
-- **Connect 4** (In Progress): Drop your pieces into columns, aiming to get four in a row.
-- **Snake** (Planned): Control a growing snake, eating food while avoiding collisions.
+- **Connect 4**: Drop your pieces into columns, aiming to get four in a row.
+- **Snake**: Control a growing snake, eating food while avoiding collisions.
 
 ## Download and Play
 
@@ -53,18 +53,30 @@ To run these games, you need:
 ### How to Play
 
 1. **Run the Project**:
-   - Set `GamePlatform` as the startup project in your IDE.
+   - Set `GameEngine` as the startup project in your IDE. It builds `GamePlatform.exe`.
    - Press `F5` to build and run the game.
    
 2. **Select a Game**:
    - Upon starting, a menu will appear to select which game you want to play.
    - Follow the on-screen instructions to enjoy the game.
 
+### Run Tests
+
+From the repository root:
+
+```bash
+dotnet test ConsoleGames/GameEngine.sln
+```
+
 ## Project Structure
 
-- **2048Game**: Contains the implementation of the 2048 game.
-- **TikTacToe**: Contains the implementation of the Tic Tac Toe game.
-- **GamePlatform**: A central project that ties all games together, providing a menu-based interface.
+- **ConsoleGames/GameEngine**: The main console application and game menu.
+- **ConsoleGames/GameEngine/Games/2048**: Contains the implementation of 2048.
+- **ConsoleGames/GameEngine/Games/TicTacToe**: Contains the implementation of Tic Tac Toe.
+- **ConsoleGames/GameEngine/Games/Connect4**: Contains the implementation of Connect 4.
+- **ConsoleGames/GameEngine/Games/Snake**: Contains the implementation of Snake.
+- **ConsoleGames/BasicGameInterface**: Shared interface for console games.
+- **ConsoleGames/GamePlatform.Tests**: Regression tests for game rules and model behavior.
 
 Each project is self-contained, making it easy to navigate and understand the code.
 

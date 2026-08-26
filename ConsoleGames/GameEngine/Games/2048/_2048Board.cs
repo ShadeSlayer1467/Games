@@ -11,21 +11,19 @@ namespace _2048Game
 
         internal void GenerateNewNumbers(Random rand)
         {
-            int numOfSquaresToGenerate = (rand.Next(10) % 3 == 2) ? 2 : 1;
-            for (int i = 0; i < numOfSquaresToGenerate; i++)
-            {
-                if (!board.Contains(0)) return;
+            if (!board.Contains(0)) return;
 
-                int index = rand.Next(0, 16);
-                while (board[index] != 0)
-                {
-                    index = rand.Next(0, 16);
-                }
-                board[index] = rand.NextDouble() < 0.9 ? 2 : 4;
+            int index = rand.Next(0, BOARD_SIZE);
+            while (board[index] != 0)
+            {
+                index = rand.Next(0, BOARD_SIZE);
             }
+
+            board[index] = rand.NextDouble() < 0.9 ? 2 : 4;
         }
-        internal void MoveLeft()
+        internal bool MoveLeft()
         {
+            int[] previousBoard = board.ToArray();
             int[] ints = new int[COLUMN_COUNT];
             int index = 0;
             for (int i = 0; i < BOARD_SIZE; i += COLUMN_COUNT)
@@ -44,9 +42,11 @@ namespace _2048Game
                 }
                 index = 0;
             }
+            return !board.SequenceEqual(previousBoard);
         }
-        internal void MoveRight()
+        internal bool MoveRight()
         {
+            int[] previousBoard = board.ToArray();
             int[] ints = new int[COLUMN_COUNT];
             int index = 0;
             for (int i = COLUMN_COUNT - 1; i < BOARD_SIZE; i += COLUMN_COUNT)
@@ -65,9 +65,11 @@ namespace _2048Game
                 }
                 index = 0;
             }
+            return !board.SequenceEqual(previousBoard);
         }
-        internal void MoveUp()
+        internal bool MoveUp()
         {
+            int[] previousBoard = board.ToArray();
             int[] ints = new int[ROW_COUNT];
             int index = 0;
             for (int i = 0; i < COLUMN_COUNT; i++)
@@ -87,9 +89,11 @@ namespace _2048Game
                 index = 0;
             }
 
+            return !board.SequenceEqual(previousBoard);
         }
-        internal void MoveDown()
+        internal bool MoveDown()
         {
+            int[] previousBoard = board.ToArray();
             int[] ints = new int[ROW_COUNT];
             int index = 0;
             for (int i = BOARD_SIZE - 1; i >= BOARD_SIZE - COLUMN_COUNT; i--)
@@ -108,6 +112,7 @@ namespace _2048Game
                 }
                 index = 0;
             }
+            return !board.SequenceEqual(previousBoard);
         }
         internal bool IsFull() => board.Contains(0) == false;
         internal bool CanMove()
@@ -131,37 +136,30 @@ namespace _2048Game
         }
         private void ComputeLine(int[] inputLineCells, out int[] lineCell)
         {
-            for (int i = 0; i < inputLineCells.Length - 1; i++)
+            int[] result = new int[inputLineCells.Length];
+            int targetIndex = 0;
+
+            for (int i = 0; i < inputLineCells.Length; i++)
             {
-                for (int j = i + 1; j < inputLineCells.Length; j++)
-                {
-                    if (inputLineCells[i] == inputLineCells[j])
-                    {
-                        inputLineCells[i] *= 2;
-                        inputLineCells[j] = 0;
-                        break;
-                    }
-                    if (inputLineCells[j] != 0)
-                    {
-                        break;
-                    }
-                }
-            }
-            for (int i = 0; i < inputLineCells.Length - 1; i++)
-            {
-                if (inputLineCells[i] != 0) continue;
+                if (inputLineCells[i] == 0) continue;
+
+                int value = inputLineCells[i];
                 for (int j = i + 1; j < inputLineCells.Length; j++)
                 {
                     if (inputLineCells[j] == 0) continue;
-                    if (inputLineCells[i] == 0)
+
+                    if (value == inputLineCells[j])
                     {
-                        inputLineCells[i] = inputLineCells[j];
-                        inputLineCells[j] = 0;
-                        break;
+                        value *= 2;
+                        i = j;
                     }
+                    break;
                 }
+
+                result[targetIndex++] = value;
             }
-            lineCell = inputLineCells;
+
+            lineCell = result;
         }
 
         private const int BOARD_SIZE = 16;

@@ -1,7 +1,6 @@
 2048
 Tic Tac Toe
 connect 4
--- refactor winner check to be based on most recent piece
 
 snake
 

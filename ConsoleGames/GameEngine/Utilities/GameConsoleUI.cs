@@ -48,16 +48,22 @@ namespace GamePlatform.Utilities
         }
         public static void ClearConsoleToLine(int top)
         {
-            Console.SetCursorPosition(0, top);
-            for (int i = 0; i < Console.WindowHeight - top; i++)
+            int boundedTop = Math.Max(0, Math.Min(top, Console.WindowHeight - 1));
+
+            for (int i = boundedTop; i < Console.WindowHeight; i++)
             {
+                Console.SetCursorPosition(0, i);
                 Console.Write(new string(' ', Console.WindowWidth));
             }
+            Console.SetCursorPosition(0, boundedTop);
         }
         public static void ClearConsoleLineBuffer(int top)
         {
-            Console.SetCursorPosition(0, top);
+            int boundedTop = Math.Max(0, Math.Min(top, Console.WindowHeight - 1));
+
+            Console.SetCursorPosition(0, boundedTop);
             Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, boundedTop);
         }
         public static void Write(string message)
         {

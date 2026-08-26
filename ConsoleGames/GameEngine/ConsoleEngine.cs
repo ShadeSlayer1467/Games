@@ -84,15 +84,16 @@ namespace GameEngine
         {
             Thread.Sleep(300);
             GameConsoleUI.FlushKeyBuffer();
+            int promptTop = GameConsoleUI.CursorTop;
             GameConsoleUI.Write(PLAY_AGAIN_PROMPT);
             char inputResponse = GameConsoleUI.ReadKey(true).KeyChar;
             bool response = inputResponse.ToString().ToLower() == PLAY_AGAIN_YES;
-            ClearConsoleBuffer(GameConsoleUI.CursorTop);
+            ClearConsoleBuffer(promptTop);
             return response;
         }
         private void ClearConsoleBuffer(int top)
         {
-            GameConsoleUI.ClearConsoleLineBuffer(top);
+            GameConsoleUI.ClearConsoleToLine(top);
         }
         private List<(Type type, string Name)> GetDLLTypes()
         {

@@ -3,14 +3,10 @@ using BasicGameInterface;
 using GameEngine;
 using GamePlatform.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace GamePlatform.Games.Snake
 {
@@ -20,7 +16,6 @@ namespace GamePlatform.Games.Snake
         SnakeGameModel snakeModel;
         Vector2 Border => new Vector2(GameConsoleUI.WindowWidth, GameConsoleUI.WindowHeight);
         bool gameOver = false;
-        char lastKeyPressed;
         int difficulty = FRAME_WAIT;
         int sleepMS = FRAME_WAIT;
 
@@ -35,7 +30,6 @@ namespace GamePlatform.Games.Snake
             GameConsoleUI.CursorVisible = false;
             GameConsoleUI.ClearConsole();
             snakeModel = new SnakeGameModel();
-            snakeModel.food = new Vector2(5, 5);
             gameOver = false;
         }
         public override void RunGame()
@@ -44,6 +38,7 @@ namespace GamePlatform.Games.Snake
             GameConsoleUI.WriteLine(ENGLISH_DIRECTIONS, COMMUNICATION_LINE_TOP);
             GameConsoleUI.ReadKeyChar(true);
             difficulty = GetDifficultyFromPlayer();
+            sleepMS = difficulty;
             GameConsoleUI.ClearConsole();
             PrintBorder();
 
@@ -83,17 +78,18 @@ namespace GamePlatform.Games.Snake
             GameConsoleUI.ClearConsole();
             GameConsoleUI.WriteLine($"Game Over... Size: {snakeModel.Body.Count}... Press space to continue");
             Thread.Sleep(1000);
-            GameConsoleUI.ReadKeyChar(true);
+            while (GameConsoleUI.ReadKeyChar(true) != ' ') ;
         }
         private void UpdateFrame()
         {
             if (GameConsoleUI.KeyAvailable)
             {
-                lastKeyPressed = GameConsoleUI.ReadKeyChar(true);
-                MovePieces(lastKeyPressed);
+                MovePieces(GameConsoleUI.ReadKeyChar(true));
             }
             Thread.Sleep(sleepMS);
             Vector2 tail = snakeModel.Body.Last();
+
+            snakeModel.Move();
             if (CheckForCollision())
             {
                 gameOver = true;
@@ -101,7 +97,7 @@ namespace GamePlatform.Games.Snake
             }
             if (CheckFoodCollision())
             {
-                snakeModel.AddToBody();
+                snakeModel.AddToBody(tail);
                 PrintSnake();
 
                 snakeModel.food = null;
@@ -110,7 +106,6 @@ namespace GamePlatform.Games.Snake
             }
             else
             {
-                snakeModel.Move();
                 PrintSnake();
                 GameConsoleUI.SetCursorPosition((int)tail.X, (int)tail.Y);
                 GameConsoleUI.Write(" ");
@@ -126,6 +121,8 @@ namespace GamePlatform.Games.Snake
         }
         private void PrintFood()
         {
+            if (!snakeModel.food.HasValue) return;
+
             GameConsoleUI.SetCursorPosition((int)snakeModel.food.Value.X, (int)snakeModel.food.Value.Y);
             GameConsoleUI.Write("X");
         }
@@ -149,17 +146,20 @@ namespace GamePlatform.Games.Snake
         }
         private bool CheckForCollision()
         {
-            if (snakeModel.Head.X == Border.X - 2 || snakeModel.Head.Y == Border.Y - 1 || snakeModel.Head.X == 1 || snakeModel.Head.Y == 1) return true;
+            if (snakeModel.Head.X >= Border.X - 2 ||
+                snakeModel.Head.Y >= Border.Y - 1 ||
+                snakeModel.Head.X <= 1 ||
+                snakeModel.Head.Y <= 0) return true;
             if (snakeModel.Body.Count > 1 && snakeModel.Body.Skip(1).Any(b => b == snakeModel.Head)) return true;
             return false;
         }
         private bool CheckFoodCollision()
         {
-            return (snakeModel.Head == snakeModel.food);
+            return snakeModel.food.HasValue && snakeModel.Head == snakeModel.food.Value;
         }
         private void MovePieces(char direction)
         {
-            switch (direction)
+            switch (char.ToLowerInvariant(direction))
             {
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.t:
                     snakeModel.Direction = new Vector2(0, -1);

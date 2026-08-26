@@ -1,11 +1,7 @@
 ﻿using GameEngine;
-using GamePlatform.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GamePlatform.Games.Snake
 {
@@ -40,21 +36,33 @@ namespace GamePlatform.Games.Snake
             }
             Body[0] += Direction;
         }
-        internal void AddToBody()
+        internal void AddToBody(Vector2 newTail)
         {
-            var tail = Tail;
-            Move();
-            Body.Add(tail);
+            Body.Add(newTail);
         }
         internal void GenerateFood(Vector2 Border)
         {
             Random random = RandomSingleton.Instance;
+            List<Vector2> openLocations = new List<Vector2>();
 
-            while (true)
+            for (int x = PLAYABLE_MIN_X; x < (int)Border.X - RIGHT_BORDER_WIDTH; x++)
             {
-                food = new Vector2(random.Next(1, (int)Border.X-2), random.Next(1, (int)Border.Y-2));
-                if (!Body.Contains(food.Value)) break;
+                for (int y = PLAYABLE_MIN_Y; y < (int)Border.Y - BOTTOM_BORDER_HEIGHT; y++)
+                {
+                    Vector2 location = new Vector2(x, y);
+                    if (!Body.Contains(location))
+                    {
+                        openLocations.Add(location);
+                    }
+                }
             }
+
+            food = openLocations.Count == 0 ? (Vector2?)null : openLocations[random.Next(openLocations.Count)];
         }
+
+        private const int PLAYABLE_MIN_X = 2;
+        private const int PLAYABLE_MIN_Y = 1;
+        private const int RIGHT_BORDER_WIDTH = 2;
+        private const int BOTTOM_BORDER_HEIGHT = 1;
     }
 }

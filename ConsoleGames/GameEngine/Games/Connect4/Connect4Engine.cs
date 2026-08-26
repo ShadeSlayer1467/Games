@@ -96,7 +96,7 @@ namespace Connect4
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("  1   2   3   4   5   6   7");
             sb.AppendLine("┌───┬───┬───┬───┬───┬───┬───┐");
-            for (int row = 0; row < 6; row++)
+            for (int row = 0; row < board.ROWS; row++)
             {
                 sb.Append("│");
                 for (int col = 0; col < board.COLUMNS; col++)
@@ -117,7 +117,7 @@ namespace Connect4
                     }
                 }
                 sb.AppendLine();
-                if (row < 5)
+                if (row < board.ROWS - 1)
                 {
                     sb.AppendLine("├───┼───┼───┼───┼───┼───┼───┤");
                 }

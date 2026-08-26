@@ -12,8 +12,6 @@ namespace TicTacToe
     [GameName("Tic Tac Toe")]
     public class TicTacToeEngine : ConsoleGame
     {
-        private string Player1;
-        private string Player2;
         private char winner;
         private bool Player1Turn;
         private readonly TicTacToeBoard boardModel;
@@ -31,8 +29,6 @@ namespace TicTacToe
             GameConsoleUI.ClearConsole();
             GameConsoleUI.Title = "Tic Tac Toe";
             boardModel.Init();
-            Player1 = PLAYER1_NAME;
-            Player2 = PLAYER2_NAME;
             Player1Turn = true;
 
             PrintBoard();
@@ -94,7 +90,7 @@ namespace TicTacToe
                     flashThread = new Thread(FlashCursor);
                     flashThread.Start();
                 }
-                if (GetBoardCharacter(BoardCursorPosition) != ',') continue;
+                if (GetBoardCharacter(BoardCursorPosition) != TicTacToeBoard.EmptyCell) continue;
                 else break;
             }
 
@@ -130,14 +126,22 @@ namespace TicTacToe
                 }
                 direction = keyInfo.KeyChar;
 
-                if (QWERTY_DEFAULT_DIRECTION_KEYS.ToString().ToLower().Contains(direction)) break;
+                if (IsMoveKey(direction)) break;
             }
 
             return direction;
         }
+        private bool IsMoveKey(char direction)
+        {
+            char normalizedDirection = char.ToUpperInvariant(direction);
+            return normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.t ||
+                   normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.l ||
+                   normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.d ||
+                   normalizedDirection == QWERTY_DEFAULT_DIRECTION_KEYS.r;
+        }
         private void MoveBoardPosition(char direction)
         {
-            switch (char.ToUpper(direction))
+            switch (char.ToUpperInvariant(direction))
             {
                 case var t when t == QWERTY_DEFAULT_DIRECTION_KEYS.t:
                     MoveUp();
@@ -195,6 +199,7 @@ namespace TicTacToe
             char? boardChar = GetBoardCharacter(cursorPos);
 
             if (boardChar == null) return;
+            string displayCharacter = GetDisplayCharacter(boardChar.Value);
 
             while (_keepFlashing)
             {
@@ -207,7 +212,7 @@ namespace TicTacToe
                 lock (_Cursorlock)
                 {
                     GameConsoleUI.SetCursorPosition(cursorPos.l, cursorPos.t);
-                    GameConsoleUI.Write(@"{0,2}", boardChar);
+                    GameConsoleUI.Write(@"{0,2}", displayCharacter);
                 }
                 Thread.Sleep(100);
             }
@@ -247,13 +252,17 @@ namespace TicTacToe
                 lock (_Cursorlock)
                 {
                     GameConsoleUI.SetCursorPosition(cursor.l, cursor.t);
-                    GameConsoleUI.Write(@"{0,2}", boardModel[BOARD_CURSOR_LOCATIONS.IndexOf(cursor)]);
+                    GameConsoleUI.Write(@"{0,2}", GetDisplayCharacter(boardModel[BOARD_CURSOR_LOCATIONS.IndexOf(cursor)]));
                 }
             }
         }
+        private string GetDisplayCharacter(char boardCharacter)
+        {
+            return boardCharacter == TicTacToeBoard.EmptyCell ? " " : boardCharacter.ToString();
+        }
 
         private readonly (int l, int t) BOARD_POSITION = (0, 0);
-        private readonly List<(int l, int t)> BOARD_CURSOR_LOCATIONS = new List<(int l, int r)>
+        private readonly List<(int l, int t)> BOARD_CURSOR_LOCATIONS = new List<(int l, int t)>
         {
             (1, 1), (5, 1), (9, 1),
             (1, 3), (5, 3), (9, 3),
@@ -268,8 +277,6 @@ namespace TicTacToe
 
         private const char PLAYER1_SYMBOL = 'X';
         private const char PLAYER2_SYMBOL = 'O';
-        private const string PLAYER1_NAME = "Player 1";
-        private const string PLAYER2_NAME = "Player 2";
         private const string ENGLISH_DIRECTIONS = "Enter a direction (W, A, S, D) to move the cursor and press Enter to place your symbol. ";
         private const string DRAW_MESSAGE = "DRAW! GAME OVER! "; 
         private const string PLAYER1_WINS = "PLAYER 1 WINS! GAME OVER! ";
