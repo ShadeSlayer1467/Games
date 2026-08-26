@@ -29,7 +29,7 @@ This project is a collection of various games implemented in C#. The goal is to 
 
 ## Download and Play
 
-You can download the latest version of the games as standalone executables from the [Releases](https://github.com/ShadeSlayer1467/Games/releases) section. Simply download the ZIP file for the games, extract it, and run the `.exe` file.
+You can download the latest standalone executable from the [Releases](https://github.com/ShadeSlayer1467/Games/releases) section. Download `GamePlatform.exe` and run it.
 
 ## Self Compile
 ### Prerequisites
